@@ -1,0 +1,4 @@
+venv
+docker-spark-iceberg
+*.ipynb_checkpoints
+__pycache__/
