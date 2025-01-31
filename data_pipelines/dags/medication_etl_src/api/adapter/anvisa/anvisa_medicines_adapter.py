@@ -10,8 +10,13 @@ class AnvisaMedicinesAdapter:
         'numero': 'numero_processo',
         'principioAtivo': 'principio_ativo',
         'categoriaRegulatoria.descricao': 'categoria_regulatoria',
+        'medicamentoReferencia': 'medicamento_referencia',
         'cnpj': 'cnpj_laboratorio',
         'razaoSocial': 'razao_social_laboratorio',
+        'tipoAutorizacao': 'tipo_autorizacao',
+        'registro_ativo': 'registro_ativo',
+        'dataRegistro': 'data_registro',
+        'dataVencimentoRegistro': 'data_vencimento_registro',
     }
 
     def adapt(self, medicines: list[dict]) -> list[Medicine]:
@@ -28,6 +33,6 @@ class AnvisaMedicinesAdapter:
         medicines_df = medicines_df[[k for k in self.COLUMN_MAPPER]]
         medicines_df = medicines_df.rename(columns=self.COLUMN_MAPPER)
 
-        medicines = medicines_df.apply(lambda row: Medicine(*row), axis=1).tolist()
+        medicines = medicines_df.apply(lambda row: Medicine(**row), axis=1).tolist()
 
         return medicines

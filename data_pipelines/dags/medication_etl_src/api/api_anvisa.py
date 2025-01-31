@@ -6,20 +6,31 @@ from medication_etl_src.api.adapter.anvisa.anvisa_medicines_adapter import Anvis
 
 class ApiAnvisa:
     BASE_URL = "https://consultas.anvisa.gov.br/api"
-    MAX_RETRIES = 3
+    MAX_RETRIES = 10
 
     def __init__(self):
         self._times_retried: int
 
     def get_medicines(self) -> list[Medicine]:
 
-        medicines: list[dict] = self._make_request_with_pagination(
+        active_medicines: list[dict] = self._make_request_with_pagination(
             endpoint="/consulta/medicamento/produtos",
-            params={"filter[situacaoRegistro]": "V", 'checkNotificado': 'false', 'checkRegistrado': 'true'},
-            count_by_page=1000,
+            params={"filter[situacaoRegistro]": "V"},
+            count_by_page=2000,
         )
+        for a in active_medicines:
+            a['registro_ativo'] = True
 
-        medicines: list[Medicine] = AnvisaMedicinesAdapter().adapt(medicines=medicines)
+        not_active_medicines: list[dict] = self._make_request_with_pagination(
+            endpoint="/consulta/medicamento/produtos",
+            params={"filter[situacaoRegistro]": "C"},
+            count_by_page=2000,
+        )
+        for a in not_active_medicines:
+            a['registro_ativo'] = False
+
+        all_medicines: list[dict] = not_active_medicines + active_medicines
+        medicines: list[Medicine] = AnvisaMedicinesAdapter().adapt(medicines=all_medicines)
 
         return medicines 
 
