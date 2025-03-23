@@ -13,7 +13,7 @@ class ApiAnvisa:
     MAX_RETRIES = 10
 
     def __init__(self):
-        self._times_retried: int
+        self._times_retried: int=0
 
     def get_medicines(self) -> list[Medicine]:
 
@@ -88,6 +88,38 @@ class ApiAnvisa:
                 result.append(presentations)
 
         return result
+
+    def get_regulation_category(self):
+
+        with StealthSession() as session:
+
+            
+            # First get the home page to make requests more stealthy
+            session.get("https://consultas.anvisa.gov.br")
+            time.sleep(self._get_random_number(1, 3, 2))
+
+            categories = self._make_request(
+                endpoint="/tipoCategoriaRegulatoria",
+                session=session,
+            )
+
+        return categories
+
+
+    def get_pharmaceutic_forms(self):
+
+        with StealthSession() as session:
+
+            # First get the home page to make requests more stealthy
+            session.get("https://consultas.anvisa.gov.br")
+            time.sleep(self._get_random_number(1, 3, 2))
+
+            pharmaceutic_forms = self._make_request(
+                endpoint="/formafarmaceutica/formasFisicas",
+                session=session,
+            )
+
+        return pharmaceutic_forms
 
     def _make_request_with_pagination(self, endpoint: str, count_by_page: int, headers: str | None=None, params: dict | None=None) -> list[dict]:
         
