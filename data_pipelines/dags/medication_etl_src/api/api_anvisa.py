@@ -6,57 +6,71 @@ from stealth_requests import StealthSession
 import random
 import time
 import numpy as np
+import traceback
 
 
 class ApiAnvisa:
     BASE_URL = "https://consultas.anvisa.gov.br/api"
-    MAX_RETRIES = 10
+    MAX_RETRIES = 2
 
     def __init__(self):
         self._times_retried: int=0
 
-    def get_medicines(self) -> list[Medicine]:
+    def get_active_medicines(self) -> list[Medicine]:
 
         active_medicines: list[dict] = self._make_request_with_pagination(
             endpoint="/consulta/medicamento/produtos",
             params={"filter[situacaoRegistro]": "V"},
-            count_by_page=1500,
+            count_by_page=1200,
         )
-        for a in active_medicines:
-            a['registro_ativo'] = True
+        #for a in active_medicines:
+        #    a['registro_ativo'] = True
+
+        #not_active_medicines: list[dict] = self._make_request_with_pagination(
+        #    endpoint="/consulta/medicamento/produtos",
+        #    params={"filter[situacaoRegistro]": "C"},
+        #    count_by_page=1500,
+        #)
+        #for a in not_active_medicines:
+        #    a['registro_ativo'] = False
+
+        #all_medicines: list[dict] = not_active_medicines + active_medicines
+        #medicines: list[Medicine] = AnvisaMedicinesAdapter().adapt(medicines=all_medicines)
+
+        return active_medicines
+
+    def get_inactive_medicines(self):
 
         not_active_medicines: list[dict] = self._make_request_with_pagination(
             endpoint="/consulta/medicamento/produtos",
             params={"filter[situacaoRegistro]": "C"},
-            count_by_page=1500,
+            count_by_page=1200,
         )
-        for a in not_active_medicines:
-            a['registro_ativo'] = False
 
-        all_medicines: list[dict] = not_active_medicines + active_medicines
-        medicines: list[Medicine] = AnvisaMedicinesAdapter().adapt(medicines=all_medicines)
+        return not_active_medicines
 
-        return medicines
-
-    def get_presentations(self, medicine_codes: list[str]) -> list:
+    def get_presentations(self, medicines: list[dict]) -> list:
 
         result = []
 
-        total_medicines = len(medicine_codes)
+        total_medicines = len(medicines)
         i = 0
 
         with StealthSession() as session:
 
-            
-            # First get the home page to make requests more stealthy
-            session.get("https://consultas.anvisa.gov.br")
-            time.sleep(self._get_random_number(1, 3, 2))
+            try:
+                # First get the home page to make requests more stealthy
+                session.get("https://consultas.anvisa.gov.br")
+                time.sleep(self._get_random_number(1, 3, 2))
 
-            # First get the home page to make requests more stealthy
-            session.get("https://consultas.anvisa.gov.br/api/empresa/funcionamento?column=&count=10&filter%5BtipoProduto%5D=1&order=asc&page=1")
-            time.sleep(self._get_random_number(1, 3, 2))
+                # First get the home page to make requests more stealthy
+                session.get("https://consultas.anvisa.gov.br/api/empresa/funcionamento?column=&count=10&filter%5BtipoProduto%5D=1&order=asc&page=1")
+                time.sleep(self._get_random_number(1, 3, 2))
+            except Exception:
+                time.sleep(self._get_random_number(5, 10, 7))
+                pass
 
-            for medicine in medicine_codes:
+            for medicine in medicines:
 
                 self._times_retried = 0
                 i += 1
@@ -68,24 +82,30 @@ class ApiAnvisa:
                     print("Sleeping ", sleep_time, "seconds")
                     time.sleep(sleep_time)
                     # get the home page to make requests more stealthy
-                    session.get("https://consultas.anvisa.gov.br/api/empresa/funcionamento?column=&count=10&filter%5BtipoProduto%5D=1&order=asc&page=1")
+                    try:
+                        session.get("https://consultas.anvisa.gov.br/api/empresa/funcionamento?column=&count=10&filter%5BtipoProduto%5D=1&order=asc&page=1")
+                    except Exception:
+                        time.sleep(self._get_random_number(5, 10, 7))
                     time.sleep(random.random())
 
-                sleep_time = self._get_random_number(2, 10, 2)
+                #sleep_time = self._get_random_number(0.5, 2.5, 0.7)
+                sleep_time = self._get_random_number(0.3, 0.7, 0.4)
                 print("Sleeping ", sleep_time, "seconds")
                 time.sleep(sleep_time)
 
                 # Todo remove this try catch
                 try:
                     presentations: list[dict] = self._make_request(
-                        endpoint=f"/consulta/medicamento/produtos/codigo/{medicine}",
+                        endpoint=f"/consulta/medicamento/produtos/codigo/{medicine['codigo']}",
+                        params={"codigoNotificacao":medicine['codigoNotificacao']} if medicine['codigoNotificacao'] else None,
                         session=session
                     )
+                    result.append(presentations)
                 except Exception:
                     print("QUEBROU QUEBROU QUEBROU")
-                    break
-
-                result.append(presentations)
+                    print(traceback.format_exc())
+                    print("QUEBROU QUEBROU QUEBROU")
+                    return result
 
         return result
 
@@ -179,8 +199,10 @@ class ApiAnvisa:
             end_time = time.time()
         except Exception as e:
             if self._times_retried < self.MAX_RETRIES:
+                self._times_retried += 1
                 time.sleep(10+random.randint(0, 10))
                 print("Erro na requisição zzzzzz")
+                print(traceback.format_exc())
                 return self._make_request(session=session, endpoint=endpoint, headers=headers, params=params)
             else:
                 raise e
@@ -207,9 +229,11 @@ class ApiAnvisa:
     def _get_random_number(self, min_number=None, max_number=None, mode=None):
 
         numbers = np.random.triangular(
-            left = min_number - 0.5,
+            #left = min_number - 0.5,
+            left = min_number,
             mode = mode,
-            right = max_number + 0.5,
+            #right = max_number + 0.5,
+            right = max_number,
             size=1
         )
         return numbers[0]
