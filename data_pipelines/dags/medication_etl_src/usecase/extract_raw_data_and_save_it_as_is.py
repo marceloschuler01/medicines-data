@@ -19,7 +19,8 @@ class GetRawDataAndSaveItAsIs():
         #self.extract_and_save_inactive_medicines_data()
         #self.extract_and_save_regulatory_category()
         #self.extract_and_save_pharmaceutic_forms()
-        self.extract_and_save_presentations()
+        #self.extract_and_save_presentations()
+        self.extract_and_save_presentations_from_inactive_medicines()
 
     def extract_and_save_active_medicines_data(self):
 
@@ -60,29 +61,60 @@ class GetRawDataAndSaveItAsIs():
         medicines = medicines[:medicines_per_time] if len(medicines) > medicines_per_time else medicines
 
         presentations = self.api.get_presentations(medicines=medicines)
-        self.save_json(data=alredy_saved_data+presentations, filename="presentations_from_active_medicines.json")
+        if presentations:
+            self.save_json(data=alredy_saved_data+presentations, filename="presentations_from_active_medicines.json")
+
+        # del variables before call recursive function
+        del medicines
+        del presentations
+        del alredy_saved_data
+        del already_readed_codes
     
         if to_be_saved_after > 0:
             return self.extract_and_save_presentations()
         return "Finalizado"
 
     def extract_and_save_presentations_from_inactive_medicines(self):
-        
-        # From inactive medicines
+
+        # From active medicines
         with open('C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/temp_files/2025-03-30inactive_medicines.json', 'r', encoding="utf8") as f:
             medicines = json.load(f)
-            medicine_codes = set([m['codigoProduto'] for m in medicines])
-        
+            medicines = [{'codigo': m['produto']['codigo'], 'codigoNotificacao': m['produto']['codigoNotificacao']} for m in medicines]
+            medicines = pd.DataFrame(medicines)
+
         try:
             with open('C:/Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/temp_files/2025-03-30presentations_from_inactive_medicines.json', 'r', encoding="utf8") as f:
                 alredy_saved_data = json.load(f)
-                already_readed_codes = set([m['produto']['codigo'] for m in alredy_saved_data])
+                already_readed_codes = set([m['codigoProduto'] for m in alredy_saved_data])
         except FileNotFoundError:
             alredy_saved_data = []
-            already_readed_codes = set()
+            already_readed_codes = []
 
-        presentations = self.api.get_presentations(medicine_codes=medicine_codes)
-        self.save_json(data=alredy_saved_data+presentations, filename="presentations_from_inactive_medicines.json")
+        #medicine_codes: list = list(medicine_codes - already_readed_codes)
+        medicines: pd.DataFrame = medicines[~medicines['codigo'].isin(already_readed_codes)]
+        medicines: list[dict] = medicines.to_dict(orient="records")
+        random.shuffle(medicines)
+
+        medicines_per_time: int = 300
+
+        print(len(medicines), " medicines to be readed")
+        to_be_saved_after = len(medicines) - medicines_per_time
+
+        medicines = medicines[:medicines_per_time] if len(medicines) > medicines_per_time else medicines
+
+        presentations = self.api.get_presentations(medicines=medicines)
+        if presentations:
+            self.save_json(data=alredy_saved_data+presentations, filename="presentations_from_inactive_medicines.json")
+
+        # del variables before call recursive function
+        del medicines
+        del presentations
+        del alredy_saved_data
+        del already_readed_codes
+    
+        if to_be_saved_after > 0:
+            return self.extract_and_save_presentations_from_inactive_medicines()
+        return "Finalizado"
 
     def extract_and_save_regulatory_category(self):
 

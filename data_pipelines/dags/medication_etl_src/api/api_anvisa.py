@@ -78,7 +78,7 @@ class ApiAnvisa:
                 print("Getting presentation ", i, "of ", total_medicines)
 
                 if i % random.randint(7, 15) == 0:
-                    sleep_time = self._get_random_number(2, 5, 2)
+                    sleep_time = self._get_random_number(0.5, 1, 0.6)
                     print("Sleeping ", sleep_time, "seconds")
                     time.sleep(sleep_time)
                     # get the home page to make requests more stealthy
@@ -88,8 +88,8 @@ class ApiAnvisa:
                         time.sleep(self._get_random_number(5, 10, 7))
                     time.sleep(random.random())
 
-                #sleep_time = self._get_random_number(0.5, 2.5, 0.7)
-                sleep_time = self._get_random_number(0.3, 0.7, 0.4)
+                #sleep_time = self._get_random_number(0.2, 0.7, 0.4)
+                sleep_time = self._get_random_number(0.1, 0.4, 0.2)
                 print("Sleeping ", sleep_time, "seconds")
                 time.sleep(sleep_time)
 
