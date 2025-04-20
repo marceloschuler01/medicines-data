@@ -70,15 +70,16 @@ class ApiAnvisa:
                 time.sleep(self._get_random_number(5, 10, 7))
                 pass
 
-            for medicine in medicines:
+            while medicines:
 
-                self._times_retried = 0
+                medicine = medicines.pop(0)
+
                 i += 1
 
                 print("Getting presentation ", i, "of ", total_medicines)
 
                 if i % random.randint(7, 15) == 0:
-                    sleep_time = self._get_random_number(0.5, 1, 0.6)
+                    sleep_time = self._get_random_number(0.5, 1, 0.7)
                     print("Sleeping ", sleep_time, "seconds")
                     time.sleep(sleep_time)
                     # get the home page to make requests more stealthy
@@ -98,14 +99,20 @@ class ApiAnvisa:
                     presentations: list[dict] = self._make_request(
                         endpoint=f"/consulta/medicamento/produtos/codigo/{medicine['codigo']}",
                         params={"codigoNotificacao":medicine['codigoNotificacao']} if medicine['codigoNotificacao'] else None,
-                        session=session
+                        session=session,
+                        allow_retries=False,
                     )
                     result.append(presentations)
+                    self._times_retried = 0
                 except Exception:
-                    print("QUEBROU QUEBROU QUEBROU")
+                    print("Erro:")
                     print(traceback.format_exc())
-                    print("QUEBROU QUEBROU QUEBROU")
-                    return result
+                    self._times_retried += 1
+                    if self._times_retried < self.MAX_RETRIES:
+                        self._times_retried += 1
+                        return result + self.get_presentations(medicines=medicines)
+                    else:
+                        return result
 
         return result
 
@@ -173,7 +180,7 @@ class ApiAnvisa:
 
         return result
     
-    def _make_request(self, session, endpoint, headers: str | None=None, params: dict | None=None) -> dict:
+    def _make_request(self, session, endpoint, headers: str | None=None, params: dict | None=None, allow_retries=True) -> dict:
 
         url = self.BASE_URL + endpoint
 
@@ -198,7 +205,7 @@ class ApiAnvisa:
             )
             end_time = time.time()
         except Exception as e:
-            if self._times_retried < self.MAX_RETRIES:
+            if self._times_retried < self.MAX_RETRIES and allow_retries:
                 self._times_retried += 1
                 time.sleep(10+random.randint(0, 10))
                 print("Erro na requisição zzzzzz")
@@ -210,7 +217,7 @@ class ApiAnvisa:
         print("Request took ", end_time - start_time, " seconds")
 
         if res.status_code != 200:
-            if self._times_retried < self.MAX_RETRIES:
+            if self._times_retried < self.MAX_RETRIES and allow_retries:
                 self._times_retried += 1
                 if res.status_code == 429:
                     time.sleep(60+random.randint(0, 10))
