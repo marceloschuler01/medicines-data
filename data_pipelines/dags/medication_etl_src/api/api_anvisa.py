@@ -59,7 +59,7 @@ class ApiAnvisa:
 
         with StealthSession() as session:
 
-            try:
+            '''try:
                 # First get the home page to make requests more stealthy
                 session.get("https://consultas.anvisa.gov.br")
                 time.sleep(self._get_random_number(1, 3, 2))
@@ -69,7 +69,7 @@ class ApiAnvisa:
                 time.sleep(self._get_random_number(1, 3, 2))
             except Exception:
                 time.sleep(self._get_random_number(5, 10, 7))
-                pass
+                pass'''
 
             while medicines:
 
@@ -90,7 +90,6 @@ class ApiAnvisa:
                         time.sleep(self._get_random_number(5, 10, 7))
                     time.sleep(random.random())
 
-                #sleep_time = self._get_random_number(0.2, 0.7, 0.4)
                 sleep_time = self._get_random_number(0.1, 0.4, 0.2)
                 print("Sleeping ", sleep_time, "seconds")
                 time.sleep(sleep_time)
@@ -110,6 +109,8 @@ class ApiAnvisa:
                     print(traceback.format_exc())
                     if self._times_to_retry > 0:
                         self._times_to_retry -= 1
+                        
+                        time.sleep(self._get_random_number(1, 3, 2))
                         return result + self.get_presentations(medicines=medicines)
                     else:
                         return result

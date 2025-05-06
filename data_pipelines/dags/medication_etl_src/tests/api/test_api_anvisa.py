@@ -54,6 +54,126 @@ class TestApiAnvisa(unittest.TestCase):
             self.assertEquals(len(result), len(expected_result))
             self.assertListEqual(expected_result, result)
 
+    def test_get_presentations(self):
+
+        medicines = [{
+            "ordem": 1,
+            "produto": {
+                "codigo": 3652639,
+                "nome": "TYLENOL",
+                "numeroRegistro": "157211214",
+                "dataVencimento": "2028-02-16T00:00:00.000-0300",
+                "mesAnoVencimento": "022028",
+                "dataVencimentoRegistro": "2028-02-01T00:00:00.000-0300",
+                "principioAtivo": "PARACETAMOL",
+                "situacaoApresentacao": "Ativo",
+                "dataRegistro": "2023-10-16T00:00:00.000-0300",
+                "tipoAutorizacao": "REGISTRADO",
+                "codigoNotificacao": 0,
+            },
+            "empresa": {
+                "cnpj": "59748988000114",
+                "razaoSocial": "KENVUE LTDA.",
+                "numeroAutorizacao": "1057211",
+                "cnpjFormatado": "59.748.988/0001-14"
+            },
+            "processo": {
+                "numero": "25351464826202349",
+                "situacao": 29,
+                "numeroProcessoFormatado": "25351.464826/2023-49"
+            }
+        },
+        {
+            "ordem": 3,
+            "produto": {
+                "codigo": 3651010,
+                "nome": "TYLENOL DC",
+                "numeroRegistro": "157211205",
+                "dataVencimento": "2027-09-16T00:00:00.000-0300",
+                "mesAnoVencimento": "092027",
+                "dataVencimentoRegistro": "2027-09-01T00:00:00.000-0300",
+                "principioAtivo": "PARACETAMOL, CAFEÍNA",
+                "situacaoApresentacao": "Ativo",
+                "tipoAutorizacao": "REGISTRADO",
+                "codigoNotificacao": 0,
+                "dataCancelamento": None,
+                "mesAnoVencimentoFormatado": "09/2027",
+                "numeroRegistroFormatado": "157211205",
+                "acancelar": False
+            },
+            "empresa": {
+                "cnpj": "59748988000114",
+                "razaoSocial": "KENVUE LTDA.",
+                "numeroAutorizacao": "1057211",
+                "cnpjFormatado": "59.748.988/0001-14"
+            },
+            "processo": {
+                "numero": "25351464218202334",
+                "situacao": 29,
+                "numeroProcessoFormatado": "25351.464218/2023-34"
+            }
+        },
+        {
+            "ordem": 2,
+            "produto": {
+                "codigo": 8544,
+                "nome": "TYLENOL BEBÊ",
+                "dataVencimento": "2034-01-08T00:00:00.000-0300",
+                "mesAnoVencimento": "012034",
+                "dataVencimentoRegistro": "2034-01-01T00:00:00.000-0300",
+                "situacaoApresentacao": "Ativo",
+                "dataRegistro": "2024-01-08T00:00:00.000-0300",
+                "tipoAutorizacao": "NOTIFICADO",
+                "descricaoMedicamentoNotificado": "PARACETAMOL 100 MG/ML (SUSPENSÃO) C",
+                "categoriaMedicamentoNotificado": None,
+                "codigoNotificacao": 53773,
+                "mesAnoVencimentoFormatado": "01/2034",
+                "numeroRegistroFormatado": "         ",
+                "acancelar": False
+            },
+            "empresa": {
+                "cnpj": "59748988000114",
+                "razaoSocial": "KENVUE LTDA.",
+                "numeroAutorizacao": "1057211",
+                "cnpjFormatado": "59.748.988/0001-14"
+            },
+            "processo": {
+                "numero": None,
+                "situacao": 1,
+                "numeroProcessoFormatado": None
+            }
+        }]
+
+        produtos = [medicine['produto'] for medicine in medicines]
+
+        api = ApiAnvisa()
+
+        time.sleep(self._get_random_number(1, 3, 2))
+        import copy
+        presentations = api.get_presentations(medicines=copy.deepcopy(produtos))
+
+        self.assertEqual(len(presentations), 3)
+
+        self.assertEqual(presentations[0]['codigoProduto'], produtos[0]['codigo'])
+        self.assertEqual(presentations[1]['codigoProduto'], produtos[1]['codigo'])
+        self.assertEqual(presentations[2]['codigoNotificacao'], produtos[2]['codigoNotificacao'])
+
+        self.assertIsInstance(presentations[0].get('apresentacoes'), list)
+        self.assertIsInstance(presentations[0].get('acondicionamentos'), list)
+        self.assertTrue(len(presentations[0]['apresentacoes']) > 0)
+        self.assertEqual(len(presentations[0]['acondicionamentos']), 0)
+
+        self.assertIsInstance(presentations[1].get('apresentacoes'), list)
+        self.assertIsInstance(presentations[1].get('acondicionamentos'), list)
+        self.assertTrue(len(presentations[1]['apresentacoes']) > 0)
+        self.assertEqual(len(presentations[1]['acondicionamentos']), 0)
+
+        self.assertIsInstance(presentations[2].get('apresentacoes'), list)
+        self.assertIsInstance(presentations[2].get('acondicionamentos'), list)
+        # Notificated medicines does not have presentations, but have acondicionamentos
+        self.assertEqual(len(presentations[2]['apresentacoes']), 0)
+        self.assertTrue(len(presentations[2]['acondicionamentos']) > 0)
+
     def _get_random_number(self, min_number=None, max_number=None, mode=None):
 
         numbers = np.random.triangular(
