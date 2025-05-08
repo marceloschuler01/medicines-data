@@ -1,0 +1,882 @@
+[{
+    "ordem": 7879,
+    "produto": {
+        "codigo": 282940,
+        "nome": "VIGOR NATUS",
+        "numeroRegistro": "144930043",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": null,
+        "mesAnoVencimento": "012029",
+        "dataVencimentoRegistro": "2029-01-01T00:00:00.000-0300",
+        "principioAtivo": "PANAX GINSENG C. A. MEY.",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2004-01-26T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 4,
+            "descricao": "Fitoterápico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "01/2029",
+        "numeroRegistroFormatado": "144930043"
+    },
+    "empresa": {
+        "cnpj": "01858973000129",
+        "razaoSocial": "AIRELA INDÚSTRIA FARMACÊUTICA LTDA.",
+        "numeroAutorizacao": "1044938",
+        "cnpjFormatado": "01.858.973/0001-29"
+    },
+    "processo": {
+        "numero": "25351025814200359",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.025814/2003-59"
+    }
+},
+{
+    "ordem": 7913,
+    "produto": {
+        "codigo": 2741274,
+        "nome": "VITAMINA D3",
+        "numeroRegistro": "125680324",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": null,
+        "mesAnoVencimento": "112031",
+        "dataVencimentoRegistro": "2031-11-01T00:00:00.000-0300",
+        "principioAtivo": "COLECALCIFEROL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2021-11-16T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 3,
+            "descricao": "Específico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "11/2031",
+        "numeroRegistroFormatado": "125680324"
+    },
+    "empresa": {
+        "cnpj": "73856593000166",
+        "razaoSocial": "PRATI DONADUZZI & CIA LTDA",
+        "numeroAutorizacao": "1025685",
+        "cnpjFormatado": "73.856.593/0001-66"
+    },
+    "processo": {
+        "numero": "25351656518202186",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.656518/2021-86"
+    }
+},
+{
+    "ordem": 7912,
+    "produto": {
+        "codigo": 3503742,
+        "nome": "VITAMINA D3",
+        "numeroRegistro": "100431446",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": "2032-08-22T00:00:00.000-0300",
+        "mesAnoVencimento": "082032",
+        "dataVencimentoRegistro": "2032-08-01T00:00:00.000-0300",
+        "principioAtivo": "COLECALCIFEROL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2022-08-22T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 3,
+            "descricao": "Específico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "08/2032",
+        "numeroRegistroFormatado": "100431446"
+    },
+    "empresa": {
+        "cnpj": "61190096000192",
+        "razaoSocial": "EUROFARMA LABORATÓRIOS S.A.",
+        "numeroAutorizacao": "1000438",
+        "cnpjFormatado": "61.190.096/0001-92"
+    },
+    "processo": {
+        "numero": "25351097821202215",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.097821/2022-15"
+    }
+},
+{
+    "ordem": 7910,
+    "produto": {
+        "codigo": 3202466,
+        "nome": "VITAMINA D3",
+        "numeroRegistro": "109740352",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": null,
+        "mesAnoVencimento": "042032",
+        "dataVencimentoRegistro": "2032-04-01T00:00:00.000-0300",
+        "principioAtivo": "COLECALCIFEROL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2022-04-11T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 3,
+            "descricao": "Específico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "04/2032",
+        "numeroRegistroFormatado": "109740352"
+    },
+    "empresa": {
+        "cnpj": "49475833000106",
+        "razaoSocial": "BIOLAB SANUS FARMACÊUTICA LTDA",
+        "numeroAutorizacao": "1009744",
+        "cnpjFormatado": "49.475.833/0001-06"
+    },
+    "processo": {
+        "numero": "25351067189202285",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.067189/2022-85"
+    }
+},
+{
+    "ordem": 7909,
+    "produto": {
+        "codigo": 1272538,
+        "nome": "VITAMINA D3",
+        "numeroRegistro": "135170039",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": "2028-12-19T00:00:00.000-0300",
+        "mesAnoVencimento": "122028",
+        "dataVencimentoRegistro": "2028-12-01T00:00:00.000-0300",
+        "principioAtivo": "COLECALCIFEROL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2018-12-31T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 3,
+            "descricao": "Específico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "12/2028",
+        "numeroRegistroFormatado": "135170039"
+    },
+    "empresa": {
+        "cnpj": "48344725000719",
+        "razaoSocial": "Althaia S.A Indústria Farmacêutica",
+        "numeroAutorizacao": "1035175",
+        "cnpjFormatado": "48.344.725/0007-19"
+    },
+    "processo": {
+        "numero": "25351726350201705",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.726350/2017-05"
+    }
+},
+{
+    "ordem": 7916,
+    "produto": {
+        "codigo": 3624234,
+        "nome": "VITAMINA D3",
+        "numeroRegistro": "103920233",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": "2034-01-29T00:00:00.000-0300",
+        "mesAnoVencimento": "012034",
+        "dataVencimentoRegistro": "2034-01-01T00:00:00.000-0300",
+        "principioAtivo": "COLECALCIFEROL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2024-01-29T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 3,
+            "descricao": "Específico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "01/2034",
+        "numeroRegistroFormatado": "103920233"
+    },
+    "empresa": {
+        "cnpj": "30222814000131",
+        "razaoSocial": "VITAMEDIC INDUSTRIA FARMACEUTICA LTDA",
+        "numeroAutorizacao": "1003923",
+        "cnpjFormatado": "30.222.814/0001-31"
+    },
+    "processo": {
+        "numero": "25351366734202302",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.366734/2023-02"
+    }
+},
+{
+    "ordem": 7915,
+    "produto": {
+        "codigo": 3188653,
+        "nome": "VITAMINA D3",
+        "numeroRegistro": "104971484",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": null,
+        "mesAnoVencimento": "042032",
+        "dataVencimentoRegistro": "2032-04-01T00:00:00.000-0300",
+        "principioAtivo": "COLECALCIFEROL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2022-04-07T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 3,
+            "descricao": "Específico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "04/2032",
+        "numeroRegistroFormatado": "104971484"
+    },
+    "empresa": {
+        "cnpj": "60665981000118",
+        "razaoSocial": "UNIÃO QUÍMICA FARMACÊUTICA NACIONAL S/A",
+        "numeroAutorizacao": "1004977",
+        "cnpjFormatado": "60.665.981/0001-18"
+    },
+    "processo": {
+        "numero": "25351096193202170",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.096193/2021-70"
+    }
+},
+{
+    "ordem": 7915,
+    "produto": {
+        "codigo": 3188676,
+        "nome": "VITAMINA D3",
+        "numeroRegistro": "104971485",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": "2032-04-01T00:00:00.000-0300",
+        "mesAnoVencimento": "042032",
+        "dataVencimentoRegistro": "2032-04-01T00:00:00.000-0300",
+        "principioAtivo": "COLECALCIFEROL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2022-04-07T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 3,
+            "descricao": "Específico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "04/2032",
+        "numeroRegistroFormatado": "104971485"
+    },
+    "empresa": {
+        "cnpj": "60665981000118",
+        "razaoSocial": "UNIÃO QUÍMICA FARMACÊUTICA NACIONAL S/A",
+        "numeroAutorizacao": "1004977",
+        "cnpjFormatado": "60.665.981/0001-18"
+    },
+    "processo": {
+        "numero": "25351096195202169",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.096195/2021-69"
+    }
+},
+{
+    "ordem": 7914,
+    "produto": {
+        "codigo": 3589467,
+        "nome": "VITAMINA D3",
+        "numeroRegistro": "100470662",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": "2034-06-10T00:00:00.000-0300",
+        "mesAnoVencimento": "062034",
+        "dataVencimentoRegistro": "2034-06-01T00:00:00.000-0300",
+        "principioAtivo": "COLECALCIFEROL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2024-06-10T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 3,
+            "descricao": "Específico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "06/2034",
+        "numeroRegistroFormatado": "100470662"
+    },
+    "empresa": {
+        "cnpj": "61286647000116",
+        "razaoSocial": "SANDOZ DO BRASIL INDÚSTRIA FARMACÊUTICA LTDA",
+        "numeroAutorizacao": "1000472",
+        "cnpjFormatado": "61.286.647/0001-16"
+    },
+    "processo": {
+        "numero": "25351370862202261",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.370862/2022-61"
+    }
+},
+{
+    "ordem": 7911,
+    "produto": {
+        "codigo": 3560526,
+        "nome": "VITAMINA D3",
+        "numeroRegistro": "155840643",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": "2032-10-10T00:00:00.000-0300",
+        "mesAnoVencimento": "102032",
+        "dataVencimentoRegistro": "2032-10-01T00:00:00.000-0300",
+        "principioAtivo": "COLECALCIFEROL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2022-10-10T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 3,
+            "descricao": "Específico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "10/2032",
+        "numeroRegistroFormatado": "155840643"
+    },
+    "empresa": {
+        "cnpj": "05161069000110",
+        "razaoSocial": "BRAINFARMA INDÚSTRIA QUÍMICA E FARMACÊUTICA S.A",
+        "numeroAutorizacao": "1055849",
+        "cnpjFormatado": "05.161.069/0001-10"
+    },
+    "processo": {
+        "numero": "25351370963202232",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.370963/2022-32"
+    }
+},
+{
+    "ordem": 7928,
+    "produto": {
+        "codigo": 1143629,
+        "nome": "VITERSOL DM",
+        "numeroRegistro": "101550249",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": null,
+        "mesAnoVencimento": "102029",
+        "dataVencimentoRegistro": "2029-10-01T00:00:00.000-0300",
+        "principioAtivo": "COLECALCIFEROL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2019-10-21T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 3,
+            "descricao": "Específico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "10/2029",
+        "numeroRegistroFormatado": "101550249"
+    },
+    "empresa": {
+        "cnpj": "60726692000181",
+        "razaoSocial": "MARJAN INDÚSTRIA E COMÉRCIO LTDA",
+        "numeroAutorizacao": "1001555",
+        "cnpjFormatado": "60.726.692/0001-81"
+    },
+    "processo": {
+        "numero": "25351173557201631",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.173557/2016-31"
+    }
+},
+{
+    "ordem": 7957,
+    "produto": {
+        "codigo": 8554,
+        "nome": "VONAUGASMAX",
+        "numeroRegistro": null,
+        "tipo": {
+            "codigo": null,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": "2032-11-28T00:00:00.000-0300",
+        "mesAnoVencimento": "112032",
+        "dataVencimentoRegistro": "2032-11-01T00:00:00.000-0300",
+        "principioAtivo": null,
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2022-11-28T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 1,
+            "descricao": "BAIXO RISCO"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "NOTIFICADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": "SIMETICONA 250 MG (CÁPSULA MOLE) C",
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 49756,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "11/2032",
+        "numeroRegistroFormatado": "         "
+    },
+    "empresa": {
+        "cnpj": "49475833001412",
+        "razaoSocial": "BIOLAB SANUS FARMACEUTICA LTDA",
+        "numeroAutorizacao": null,
+        "cnpjFormatado": "49.475.833/0014-12"
+    },
+    "processo": {
+        "numero": null,
+        "situacao": 1,
+        "numeroProcessoFormatado": null
+    }
+},
+{
+    "ordem": 7962,
+    "produto": {
+        "codigo": 998133,
+        "nome": "VORICONAZOL",
+        "numeroRegistro": "155370036",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": null,
+        "mesAnoVencimento": "112029",
+        "dataVencimentoRegistro": "2029-11-01T00:00:00.000-0300",
+        "principioAtivo": "VORICONAZOL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2014-11-03T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 5,
+            "descricao": "Genérico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "11/2029",
+        "numeroRegistroFormatado": "155370036"
+    },
+    "empresa": {
+        "cnpj": "64171697000146",
+        "razaoSocial": "ACCORD FARMACÊUTICA LTDA",
+        "numeroAutorizacao": "1055377",
+        "cnpjFormatado": "64.171.697/0001-46"
+    },
+    "processo": {
+        "numero": "25351731354201371",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.731354/2013-71"
+    }
+},
+{
+    "ordem": 7964,
+    "produto": {
+        "codigo": 1110887,
+        "nome": "VORICONAZOL",
+        "numeroRegistro": "100431244",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": null,
+        "mesAnoVencimento": "062028",
+        "dataVencimentoRegistro": "2028-06-01T00:00:00.000-0300",
+        "principioAtivo": "VORICONAZOL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2018-06-25T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 5,
+            "descricao": "Genérico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "06/2028",
+        "numeroRegistroFormatado": "100431244"
+    },
+    "empresa": {
+        "cnpj": "61190096000192",
+        "razaoSocial": "EUROFARMA LABORATÓRIOS S.A.",
+        "numeroAutorizacao": "1000438",
+        "cnpjFormatado": "61.190.096/0001-92"
+    },
+    "processo": {
+        "numero": "25351153822201693",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.153822/2016-93"
+    }
+},
+{
+    "ordem": 7965,
+    "produto": {
+        "codigo": 902487,
+        "nome": "VORICONAZOL",
+        "numeroRegistro": "100470555",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": null,
+        "mesAnoVencimento": "082025",
+        "dataVencimentoRegistro": "2025-08-01T00:00:00.000-0300",
+        "principioAtivo": "VORICONAZOL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2015-08-10T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 5,
+            "descricao": "Genérico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "08/2025",
+        "numeroRegistroFormatado": "100470555"
+    },
+    "empresa": {
+        "cnpj": "61286647000116",
+        "razaoSocial": "SANDOZ DO BRASIL INDÚSTRIA FARMACÊUTICA LTDA",
+        "numeroAutorizacao": "1000472",
+        "cnpjFormatado": "61.286.647/0001-16"
+    },
+    "processo": {
+        "numero": "25351378058201394",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.378058/2013-94"
+    }
+},
+{
+    "ordem": 7963,
+    "produto": {
+        "codigo": 939326,
+        "nome": "VORICONAZOL",
+        "numeroRegistro": "102980417",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": null,
+        "mesAnoVencimento": "042025",
+        "dataVencimentoRegistro": "2025-04-01T00:00:00.000-0300",
+        "principioAtivo": "VORICONAZOL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2015-04-13T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 5,
+            "descricao": "Genérico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "04/2025",
+        "numeroRegistroFormatado": "102980417"
+    },
+    "empresa": {
+        "cnpj": "44734671000151",
+        "razaoSocial": "CRISTÁLIA PRODUTOS QUÍMICOS FARMACÊUTICOS LTDA.",
+        "numeroAutorizacao": "1002981",
+        "cnpjFormatado": "44.734.671/0001-51"
+    },
+    "processo": {
+        "numero": "25351012776201403",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.012776/2014-03"
+    }
+},
+{
+    "ordem": 7963,
+    "produto": {
+        "codigo": 1020528,
+        "nome": "VORICONAZOL",
+        "numeroRegistro": "102980452",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": null,
+        "mesAnoVencimento": "042027",
+        "dataVencimentoRegistro": "2027-04-01T00:00:00.000-0300",
+        "principioAtivo": "VORICONAZOL",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2017-04-03T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 5,
+            "descricao": "Genérico"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "04/2027",
+        "numeroRegistroFormatado": "102980452"
+    },
+    "empresa": {
+        "cnpj": "44734671000151",
+        "razaoSocial": "CRISTÁLIA PRODUTOS QUÍMICOS FARMACÊUTICOS LTDA.",
+        "numeroAutorizacao": "1002981",
+        "cnpjFormatado": "44.734.671/0001-51"
+    },
+    "processo": {
+        "numero": "25351015521201524",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25351.015521/2015-24"
+    }
+},
+{
+    "ordem": 8053,
+    "produto": {
+        "codigo": 4680,
+        "nome": "XAROPE 44 E",
+        "numeroRegistro": "121420004",
+        "tipo": {
+            "codigo": 1,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": null,
+        "mesAnoVencimento": "092026",
+        "dataVencimentoRegistro": "2026-09-01T00:00:00.000-0300",
+        "principioAtivo": "BROMIDRATO DE DEXTROMETORFANO, GUAIFENESINA",
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2001-09-21T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 8,
+            "descricao": "Similar"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "REGISTRADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 0,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "09/2026",
+        "numeroRegistroFormatado": "121420004"
+    },
+    "empresa": {
+        "cnpj": "59476770000158",
+        "razaoSocial": "PROCTER & GAMBLE DO BRASIL LTDA.",
+        "numeroAutorizacao": "1021422",
+        "cnpjFormatado": "59.476.770/0001-58"
+    },
+    "processo": {
+        "numero": "250000080729443",
+        "situacao": 29,
+        "numeroProcessoFormatado": "25000.008072/94-43"
+    }
+}]

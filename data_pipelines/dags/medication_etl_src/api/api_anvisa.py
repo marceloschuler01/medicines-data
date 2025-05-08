@@ -7,8 +7,8 @@ import random
 import time
 import numpy as np
 import traceback
-from utils.stealth_requests_wrapper import StealthSessionWrapper
-from utils.retry_decorator import retry_decorator
+from medication_etl_src.utils.stealth_requests_wrapper import StealthSessionWrapper
+from medication_etl_src.utils.retry_decorator import retry_decorator
 
 
 
