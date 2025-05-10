@@ -66,3 +66,17 @@ class TestExtractRawDataAndSaveItAsIs(unittest.TestCase):
 
         expected_presentations = mock_anvisa.get_presentations(medicines=[med['produto'] for med in medicines])
         self.assertListEqual(sorted(presentations, key=lambda x: x['codigoProduto']), sorted(expected_presentations, key=lambda x: x['codigoProduto']))
+        
+        # pharmaceutic forms
+        with open(uc.PATH_TO_SAVE_DATA+uc.get_current_date_as_str()+'pharmaceutic_forms.json', 'r', encoding="utf8") as f:
+            pharmaceutic_forms = json.load(f)
+
+        expected_result = mock_anvisa.get_pharmaceutic_forms()
+        self.assertListEqual(sorted(pharmaceutic_forms, key=lambda x: x['id']), sorted(expected_result, key=lambda x: x['id']))
+        
+        # regulatory categories
+        with open(uc.PATH_TO_SAVE_DATA+uc.get_current_date_as_str()+'regulatory_categories.json', 'r', encoding="utf8") as f:
+            categories = json.load(f)
+
+        expected_result = mock_anvisa.get_regulation_category()
+        self.assertListEqual(sorted(categories, key=lambda x: x['id']), sorted(expected_result, key=lambda x: x['id']))

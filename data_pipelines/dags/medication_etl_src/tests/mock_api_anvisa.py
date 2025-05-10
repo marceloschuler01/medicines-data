@@ -60,8 +60,14 @@ class MockApiAnvisa:
 
     def get_regulation_category(self):
 
-        pass
+        with open(self.MOCKS_PATH+"mock_pharmaceutic_forms.json", 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        return data
 
     def get_pharmaceutic_forms(self):
 
-        pass
+        with open(self.MOCKS_PATH+"mock_regulatory_categories.json", 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        return data

@@ -15,8 +15,8 @@ class GetRawDataAndSaveItAsIs():
 
         self.extract_and_save_active_medicines_data()
         self.extract_and_save_inactive_medicines_data()
-        #self.extract_and_save_regulatory_category()
-        #self.extract_and_save_pharmaceutic_forms()
+        self.extract_and_save_regulatory_category()
+        self.extract_and_save_pharmaceutic_forms()
         self.extract_and_save_presentations()
         self.extract_and_save_presentations_from_inactive_medicines()
 
