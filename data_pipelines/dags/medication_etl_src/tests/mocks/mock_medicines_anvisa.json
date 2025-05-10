@@ -879,4 +879,42 @@
         "situacao": 29,
         "numeroProcessoFormatado": "25000.008072/94-43"
     }
+},
+{
+    "ordem": 1101,
+    "produto": {
+        "codigo": 8542,
+        "nome": "Braím",
+        "numeroRegistro": null,
+        "tipo": {
+            "codigo": null,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": "2034-12-26T00:00:00.000-0300",
+        "mesAnoVencimento": "122034",
+        "dataVencimentoRegistro": "2034-12-01T00:00:00.000-0300",
+        "principioAtivo": null,
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2024-12-26T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 1,
+            "descricao": "BAIXO RISCO"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "NOTIFICADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": "PARACETAMOL 200 MG/ML (SOLUÇÃO) C",
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 56977,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "12/2034",
+        "numeroRegistroFormatado": "         "
+    }
 }]

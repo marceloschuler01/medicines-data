@@ -23386,5 +23386,534 @@
         "indicacoes": "",
         "codigoCategoriaRegulatoria": 3,
         "dataCancelamento": null
+    },
+    {
+        "codigoProduto": 8542,
+        "codigoNotificacao": 56977,
+        "tipoProduto": null,
+        "dataProduto": "2024-12-26T00:00:00.000-0300",
+        "nomeComercial": "Braím",
+        "classesTerapeuticas": [],
+        "atcs": [],
+        "numeroRegistro": null,
+        "dataVencimento": "2034-12-26T00:00:00.000-0300",
+        "mesAnoVencimento": "122034",
+        "codigoParecerPublico": null,
+        "codigoBulaPaciente": null,
+        "codigoBulaProfissional": null,
+        "dataVencimentoRegistro": "2034-12-01T00:00:00.000-0300",
+        "principioAtivo": "PARACETAMOL 200 MG/ML (SOLUÇÃO) C",
+        "medicamentoReferencia": null,
+        "categoriaRegulatoria": "BAIXO RISCO",
+        "classeTerapeutica": null,
+        "atc": null,
+        "tipoPriorizacao": "",
+        "complemento": null,
+        "descricaoMedicamentoNotificado": "PARACETAMOL 200 MG/ML (SOLUÇÃO) C",
+        "categoriaMedicamentoNotificado": null,
+        "processosMedidaCautelar": [],
+        "empresa": {
+            "cnpj": "73856593000166",
+            "razaoSocial": "PRATI DONADUZZI & CIA LTDA",
+            "numeroAutorizacao": "1025685"
+        },
+        "processo": {
+            "numero": null,
+            "situacao": 1
+        },
+        "apresentacoes": [],
+        "acondicionamentos": [
+            {
+                "codigo": 59330,
+                "apresentacao": "200 mg/ml sol or ct fr plas opc got x 15 ml",
+                "dsValidade": "24",
+                "volume": "15",
+                "unidadeMedida": "mL",
+                "insumos": "PARACETAMOL 200 MG/ML (SOLUÇÃO) D",
+                "principiosAtivos": "PARACETAMOL 200 MG/ML (SOLUÇÃO) C",
+                "embalagemPrimaria": {
+                    "tipo": "6354",
+                    "observacao": "Frasco gotejador de plástico opaco "
+                },
+                "embalagemSecundaria": {
+                    "tipo": "6294",
+                    "observacao": "Cartucho"
+                },
+                "fabricantesNacionais": [
+                    {
+                        "fabricante": "PRATI DONADUZZI & CIA LTDA",
+                        "cnpj": "73856593000166",
+                        "pais": "BRASIL",
+                        "uf": "PR",
+                        "cidade": "TOLEDO",
+                        "etapaFabricacao": "Processo produtivo completo "
+                    }
+                ],
+                "fabricantesInternacionais": []
+            }
+        ],
+        "rotulos": [],
+        "anexoRotulos": [
+            {
+                "codigoAnexo": 34216,
+                "nomeAnexo": "2. Carta, anexos, layout.pdf",
+                "tipoArquivo": "pdf",
+                "origem": null
+            }
+        ],
+        "existeBula": false,
+        "tipoAutorizacao": "NOTIFICADO",
+        "processoMatriz": {
+            "nomeProduto": null,
+            "codProduto": null
+        },
+        "isProcessoClone": false,
+        "sinonimos": "-",
+        "indicacoes": "Uso adulto e pediátrico.\n\nIndicado para redução da febre e o alívio temporário de dores leves a moderadas, tais como dores associadas a gripes e\n\nresfriados comuns, dor de cabeça, dor no corpo, dor de dente, dor nas costas, dores musculares, dores leves associadas a artrites,\n\ndor de garganta e cólica menstrual.",
+        "codigoCategoriaRegulatoria": 1,
+        "dataCancelamento": null
+    },
+    {
+        "codigoProduto": 3557603,
+        "codigoNotificacao": 0,
+        "tipoProduto": 1,
+        "dataProduto": "2022-10-03T00:00:00.000-0300",
+        "nomeComercial": "diclofenaco sódico",
+        "classesTerapeuticas": [
+            "ANTINFLAMATORIOS ANTIREUMATICOS"
+        ],
+        "atcs": [],
+        "numeroRegistro": "118190383",
+        "dataVencimento": null,
+        "mesAnoVencimento": "112026",
+        "codigoParecerPublico": null,
+        "codigoBulaPaciente": "eyJhbGciOiJIUzUxMiJ9.eyJqdGkiOiIxODU1ODIwMSIsIm5iZiI6MTc0Mzk3NDcyOCwiZXhwIjoxNzQzOTc1MDI4fQ.nn_t9FVxBERjgzpYc1mOszUxYAASgDxdRMwkuPULOXYh-V3q6dRJojwkzZe8rb5XWEZE0m5ARzM8u6uMoUMYFA",
+        "codigoBulaProfissional": "eyJhbGciOiJIUzUxMiJ9.eyJqdGkiOiIxODU1ODIwMiIsIm5iZiI6MTc0Mzk3NDcyOCwiZXhwIjoxNzQzOTc1MDI4fQ.nOFH8H4-jC8t6UTUqtuJLgZDPZEvH8ukJJuY6Edzn1EqCmBBWOy2kxGNtFxM3hqQSKgJ474xl7VPasvP1WgJ-Q",
+        "dataVencimentoRegistro": "2026-11-01T00:00:00.000-0300",
+        "principioAtivo": "DICLOFENACO SÓDICO",
+        "medicamentoReferencia": "VOLTAREN  RETARD",
+        "categoriaRegulatoria": "Genérico",
+        "classeTerapeutica": null,
+        "atc": null,
+        "tipoPriorizacao": "",
+        "complemento": null,
+        "descricaoMedicamentoNotificado": null,
+        "categoriaMedicamentoNotificado": "1101005",
+        "processosMedidaCautelar": [],
+        "empresa": {
+            "cnpj": "92265552000905",
+            "razaoSocial": "MULTILAB INDUSTRIA E COMERCIO DE PRODUTOS FARMACEUTICOS LTDA",
+            "numeroAutorizacao": "1018196"
+        },
+        "processo": {
+            "numero": "25351065428202262",
+            "situacao": 29
+        },
+        "apresentacoes": [
+            {
+                "codigo": 429691886,
+                "apresentacao": "100MG COM REV LIB PROL CT BL AL PLAS TRANS X 10  ",
+                "formasFarmaceuticas": [
+                    "COMPRIMIDO REVESTIDO DE LIBERAÇÃO PROLONGADA"
+                ],
+                "numero": 1,
+                "tonalidade": null,
+                "dataPublicacao": "2022-10-03T00:00:00.000-0300",
+                "validade": "24",
+                "tipoValidade": "2",
+                "registro": "1181903830017",
+                "principiosAtivos": [
+                    "DICLOFENACO SÓDICO"
+                ],
+                "complemento": null,
+                "qtdUnidadeMedida": "10 Comprimido",
+                "embalagemPrimaria": null,
+                "embalagemSecundaria": {
+                    "tipo": "CARTUCHO DE CARTOLINA",
+                    "observacao": null
+                },
+                "embalagemPrimariaTodas": [
+                    {
+                        "tipo": "BLISTER DE ALUMINIO/PLASTICO TRANSPARENTE",
+                        "observacao": null
+                    }
+                ],
+                "embalagemSecundariaTodas": [
+                    {
+                        "tipo": "CARTUCHO DE CARTOLINA",
+                        "observacao": null
+                    }
+                ],
+                "envoltorios": [],
+                "acessorios": [],
+                "acondicionamento": null,
+                "marcas": [],
+                "fabricantesNacionais": [
+                    {
+                        "fabricante": "EMS S/A",
+                        "cnpj": "57507378000101",
+                        "pais": "BRASIL",
+                        "uf": "SP",
+                        "cidade": "SÃO BERNARDO DO CAMPO",
+                        "etapaFabricacao": null
+                    },
+                    {
+                        "fabricante": "EMS S/A",
+                        "cnpj": "57507378000365",
+                        "pais": "BRASIL",
+                        "uf": "SP",
+                        "cidade": "HORTOLÂNDIA",
+                        "etapaFabricacao": null
+                    }
+                ],
+                "fabricantesInternacionais": [],
+                "viasAdministracao": [
+                    "ORAL"
+                ],
+                "ifaUnico": true,
+                "conservacao": [
+                    "CONSERVAR EM  TEMPERATURA AMBIENTE ( AMBIENTE COM TEMPERATURA ENTRE 15 E 30ºC)",
+                    "PROTEGER DA LUZ E UMIDADE"
+                ],
+                "restricaoPrescricao": [],
+                "restricaoUso": [],
+                "destinacao": [],
+                "restricaoHospitais": null,
+                "tarja": null,
+                "medicamentoReferencia": "N",
+                "apresentacaoFracionada": "N",
+                "dataVencimentoRegistro": null,
+                "ativa": true,
+                "tipoAutorizacao": "REGISTRADO",
+                "emAnalise": false,
+                "inativa": false
+            },
+            {
+                "codigo": 429691887,
+                "apresentacao": "100MG COM REV LIB PROL CT BL AL PLAS TRANS X 20",
+                "formasFarmaceuticas": [
+                    "COMPRIMIDO REVESTIDO DE LIBERAÇÃO PROLONGADA"
+                ],
+                "numero": 2,
+                "tonalidade": null,
+                "dataPublicacao": "2022-10-03T00:00:00.000-0300",
+                "validade": "24",
+                "tipoValidade": "2",
+                "registro": "1181903830025",
+                "principiosAtivos": [
+                    "DICLOFENACO SÓDICO"
+                ],
+                "complemento": null,
+                "qtdUnidadeMedida": null,
+                "embalagemPrimaria": null,
+                "embalagemSecundaria": {
+                    "tipo": "CARTUCHO DE CARTOLINA",
+                    "observacao": null
+                },
+                "embalagemPrimariaTodas": [
+                    {
+                        "tipo": "BLISTER DE ALUMINIO/PLASTICO TRANSPARENTE",
+                        "observacao": null
+                    }
+                ],
+                "embalagemSecundariaTodas": [
+                    {
+                        "tipo": "CARTUCHO DE CARTOLINA",
+                        "observacao": null
+                    }
+                ],
+                "envoltorios": [],
+                "acessorios": [],
+                "acondicionamento": null,
+                "marcas": [],
+                "fabricantesNacionais": [
+                    {
+                        "fabricante": "EMS S/A",
+                        "cnpj": "57507378000101",
+                        "pais": "BRASIL",
+                        "uf": "SP",
+                        "cidade": "SÃO BERNARDO DO CAMPO",
+                        "etapaFabricacao": null
+                    },
+                    {
+                        "fabricante": "EMS S/A",
+                        "cnpj": "57507378000365",
+                        "pais": "BRASIL",
+                        "uf": "SP",
+                        "cidade": "HORTOLÂNDIA",
+                        "etapaFabricacao": null
+                    }
+                ],
+                "fabricantesInternacionais": [],
+                "viasAdministracao": [
+                    "ORAL"
+                ],
+                "ifaUnico": true,
+                "conservacao": [
+                    "CONSERVAR EM  TEMPERATURA AMBIENTE ( AMBIENTE COM TEMPERATURA ENTRE 15 E 30ºC)",
+                    "PROTEGER DA LUZ E UMIDADE"
+                ],
+                "restricaoPrescricao": [],
+                "restricaoUso": [],
+                "destinacao": [],
+                "restricaoHospitais": null,
+                "tarja": null,
+                "medicamentoReferencia": "N",
+                "apresentacaoFracionada": "N",
+                "dataVencimentoRegistro": null,
+                "ativa": true,
+                "tipoAutorizacao": "REGISTRADO",
+                "emAnalise": false,
+                "inativa": false
+            },
+            {
+                "codigo": 429691888,
+                "apresentacao": "100MG COM REV LIB PROL CT BL AL PLAS TRANS X 30",
+                "formasFarmaceuticas": [
+                    "COMPRIMIDO REVESTIDO DE LIBERAÇÃO PROLONGADA"
+                ],
+                "numero": 3,
+                "tonalidade": null,
+                "dataPublicacao": "2022-10-03T00:00:00.000-0300",
+                "validade": "24",
+                "tipoValidade": "2",
+                "registro": "1181903830033",
+                "principiosAtivos": [
+                    "DICLOFENACO SÓDICO"
+                ],
+                "complemento": null,
+                "qtdUnidadeMedida": null,
+                "embalagemPrimaria": null,
+                "embalagemSecundaria": {
+                    "tipo": "CARTUCHO DE CARTOLINA",
+                    "observacao": null
+                },
+                "embalagemPrimariaTodas": [
+                    {
+                        "tipo": "BLISTER DE ALUMINIO/PLASTICO TRANSPARENTE",
+                        "observacao": null
+                    }
+                ],
+                "embalagemSecundariaTodas": [
+                    {
+                        "tipo": "CARTUCHO DE CARTOLINA",
+                        "observacao": null
+                    }
+                ],
+                "envoltorios": [],
+                "acessorios": [],
+                "acondicionamento": null,
+                "marcas": [],
+                "fabricantesNacionais": [
+                    {
+                        "fabricante": "EMS S/A",
+                        "cnpj": "57507378000101",
+                        "pais": "BRASIL",
+                        "uf": "SP",
+                        "cidade": "SÃO BERNARDO DO CAMPO",
+                        "etapaFabricacao": null
+                    },
+                    {
+                        "fabricante": "EMS S/A",
+                        "cnpj": "57507378000365",
+                        "pais": "BRASIL",
+                        "uf": "SP",
+                        "cidade": "HORTOLÂNDIA",
+                        "etapaFabricacao": null
+                    }
+                ],
+                "fabricantesInternacionais": [],
+                "viasAdministracao": [
+                    "ORAL"
+                ],
+                "ifaUnico": true,
+                "conservacao": [
+                    "CONSERVAR EM  TEMPERATURA AMBIENTE ( AMBIENTE COM TEMPERATURA ENTRE 15 E 30ºC)",
+                    "PROTEGER DA LUZ E UMIDADE"
+                ],
+                "restricaoPrescricao": [],
+                "restricaoUso": [],
+                "destinacao": [],
+                "restricaoHospitais": null,
+                "tarja": null,
+                "medicamentoReferencia": "N",
+                "apresentacaoFracionada": "N",
+                "dataVencimentoRegistro": null,
+                "ativa": true,
+                "tipoAutorizacao": "REGISTRADO",
+                "emAnalise": false,
+                "inativa": false
+            },
+            {
+                "codigo": 429691889,
+                "apresentacao": "100MG COM REV LIB PROL CT BL AL PLAS TRANS X 40",
+                "formasFarmaceuticas": [
+                    "COMPRIMIDO REVESTIDO DE LIBERAÇÃO PROLONGADA"
+                ],
+                "numero": 4,
+                "tonalidade": null,
+                "dataPublicacao": "2022-10-03T00:00:00.000-0300",
+                "validade": "24",
+                "tipoValidade": "2",
+                "registro": "1181903830041",
+                "principiosAtivos": [
+                    "DICLOFENACO SÓDICO"
+                ],
+                "complemento": null,
+                "qtdUnidadeMedida": null,
+                "embalagemPrimaria": null,
+                "embalagemSecundaria": {
+                    "tipo": "CARTUCHO DE CARTOLINA",
+                    "observacao": null
+                },
+                "embalagemPrimariaTodas": [
+                    {
+                        "tipo": "BLISTER DE ALUMINIO/PLASTICO TRANSPARENTE",
+                        "observacao": null
+                    }
+                ],
+                "embalagemSecundariaTodas": [
+                    {
+                        "tipo": "CARTUCHO DE CARTOLINA",
+                        "observacao": null
+                    }
+                ],
+                "envoltorios": [],
+                "acessorios": [],
+                "acondicionamento": null,
+                "marcas": [],
+                "fabricantesNacionais": [
+                    {
+                        "fabricante": "EMS S/A",
+                        "cnpj": "57507378000101",
+                        "pais": "BRASIL",
+                        "uf": "SP",
+                        "cidade": "SÃO BERNARDO DO CAMPO",
+                        "etapaFabricacao": null
+                    },
+                    {
+                        "fabricante": "EMS S/A",
+                        "cnpj": "57507378000365",
+                        "pais": "BRASIL",
+                        "uf": "SP",
+                        "cidade": "HORTOLÂNDIA",
+                        "etapaFabricacao": null
+                    }
+                ],
+                "fabricantesInternacionais": [],
+                "viasAdministracao": [
+                    "ORAL"
+                ],
+                "ifaUnico": true,
+                "conservacao": [
+                    "CONSERVAR EM  TEMPERATURA AMBIENTE ( AMBIENTE COM TEMPERATURA ENTRE 15 E 30ºC)",
+                    "PROTEGER DA LUZ E UMIDADE"
+                ],
+                "restricaoPrescricao": [],
+                "restricaoUso": [],
+                "destinacao": [],
+                "restricaoHospitais": null,
+                "tarja": null,
+                "medicamentoReferencia": "N",
+                "apresentacaoFracionada": "N",
+                "dataVencimentoRegistro": null,
+                "ativa": true,
+                "tipoAutorizacao": "REGISTRADO",
+                "emAnalise": false,
+                "inativa": false
+            },
+            {
+                "codigo": 429691890,
+                "apresentacao": "100MG COM REV LIB PROL  CT BL AL PLAS TRANS X 60",
+                "formasFarmaceuticas": [
+                    "COMPRIMIDO REVESTIDO DE LIBERAÇÃO PROLONGADA"
+                ],
+                "numero": 5,
+                "tonalidade": null,
+                "dataPublicacao": "2022-10-03T00:00:00.000-0300",
+                "validade": "24",
+                "tipoValidade": "2",
+                "registro": "1181903830051",
+                "principiosAtivos": [
+                    "DICLOFENACO SÓDICO"
+                ],
+                "complemento": null,
+                "qtdUnidadeMedida": null,
+                "embalagemPrimaria": null,
+                "embalagemSecundaria": {
+                    "tipo": "CARTUCHO DE CARTOLINA",
+                    "observacao": null
+                },
+                "embalagemPrimariaTodas": [
+                    {
+                        "tipo": "BLISTER DE ALUMINIO/PLASTICO TRANSPARENTE",
+                        "observacao": null
+                    }
+                ],
+                "embalagemSecundariaTodas": [
+                    {
+                        "tipo": "CARTUCHO DE CARTOLINA",
+                        "observacao": null
+                    }
+                ],
+                "envoltorios": [],
+                "acessorios": [],
+                "acondicionamento": null,
+                "marcas": [],
+                "fabricantesNacionais": [
+                    {
+                        "fabricante": "EMS S/A",
+                        "cnpj": "57507378000101",
+                        "pais": "BRASIL",
+                        "uf": "SP",
+                        "cidade": "SÃO BERNARDO DO CAMPO",
+                        "etapaFabricacao": null
+                    },
+                    {
+                        "fabricante": "EMS S/A",
+                        "cnpj": "57507378000365",
+                        "pais": "BRASIL",
+                        "uf": "SP",
+                        "cidade": "HORTOLÂNDIA",
+                        "etapaFabricacao": null
+                    }
+                ],
+                "fabricantesInternacionais": [],
+                "viasAdministracao": [
+                    "ORAL"
+                ],
+                "ifaUnico": true,
+                "conservacao": [
+                    "CONSERVAR EM  TEMPERATURA AMBIENTE ( AMBIENTE COM TEMPERATURA ENTRE 15 E 30ºC)",
+                    "PROTEGER DA LUZ E UMIDADE"
+                ],
+                "restricaoPrescricao": [],
+                "restricaoUso": [],
+                "destinacao": [],
+                "restricaoHospitais": null,
+                "tarja": null,
+                "medicamentoReferencia": "N",
+                "apresentacaoFracionada": "N",
+                "dataVencimentoRegistro": null,
+                "ativa": true,
+                "tipoAutorizacao": "REGISTRADO",
+                "emAnalise": false,
+                "inativa": false
+            }
+        ],
+        "acondicionamentos": [],
+        "rotulos": [],
+        "anexoRotulos": [],
+        "existeBula": true,
+        "tipoAutorizacao": "REGISTRADO",
+        "processoMatriz": {
+            "nomeProduto": "DICLOFENACO SÓDICO",
+            "codProduto": 568520
+        },
+        "isProcessoClone": false,
+        "sinonimos": "",
+        "indicacoes": "",
+        "codigoCategoriaRegulatoria": 5,
+        "dataCancelamento": null
     }
 ]
