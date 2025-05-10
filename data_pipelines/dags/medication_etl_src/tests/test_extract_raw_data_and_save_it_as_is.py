@@ -36,6 +36,7 @@ class TestExtractRawDataAndSaveItAsIs(unittest.TestCase):
     def test_extract_raw_data_and_save_it_as_is(self):
 
         uc = GetRawDataAndSaveItAsIs(api=MockApiAnvisa, path_to_save_data=self.path_to_save_temp_tests_files)
+        uc.PRESENTATIONS_PER_TIME_IN_GET_PRESENTATIONS = 2
         uc.get_raw_data_and_save_it_as_is()
 
         mock_anvisa = MockApiAnvisa()

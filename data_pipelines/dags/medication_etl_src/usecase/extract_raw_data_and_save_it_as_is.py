@@ -1,9 +1,6 @@
 from medication_etl_src.api.api_anvisa import ApiAnvisa
-import sys
-import datetime
 import json
 import pandas as pd
-import random
 
 PATH_TO_SAVE_DATA="C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/temp_files/"
 
@@ -12,6 +9,7 @@ class GetRawDataAndSaveItAsIs():
     def __init__(self, api=ApiAnvisa, path_to_save_data=None):
         self.api = api()
         self.PATH_TO_SAVE_DATA = path_to_save_data or PATH_TO_SAVE_DATA
+        self.PRESENTATIONS_PER_TIME_IN_GET_PRESENTATIONS: int = 200
 
     def get_raw_data_and_save_it_as_is(self):
 
@@ -47,18 +45,33 @@ class GetRawDataAndSaveItAsIs():
             medicines = [{'codigo': m['produto']['codigo'], 'codigoNotificacao': m['produto']['codigoNotificacao'], 'tipoAutorizacao': m['produto']['tipoAutorizacao']} for m in medicines]
             medicines = pd.DataFrame(medicines)
 
+        registered_medicines = medicines[medicines['tipoAutorizacao'] != "NOTIFICADO"]
+        notificated_medicines = medicines[medicines['tipoAutorizacao'] == "NOTIFICADO"]
+
         try:
             with open(self.PATH_TO_SAVE_DATA+self.get_current_date_as_str()+'presentations_from_'+medicines_table+'.json', 'r', encoding="utf8") as f:
                 alredy_saved_data = json.load(f)
-                already_readed_codes = set([m['codigoProduto'] for m in alredy_saved_data])
+
+                already_saved_registered_medicines = [m for m in alredy_saved_data if m['tipoAutorizacao'] != "NOTIFICADO"]
+                already_saved_notificated_medicines = [m for m in alredy_saved_data if m['tipoAutorizacao'] == "NOTIFICADO"]
+                already_readed_registered_codes = set([m['codigoProduto'] for m in already_saved_registered_medicines])
+                already_readed_notification_codes = set([m['codigoNotificacao'] for m in already_saved_notificated_medicines])
+        
         except FileNotFoundError:
             alredy_saved_data = []
-            already_readed_codes = []
+            
+            already_readed_registered_codes = []
+            already_readed_notification_codes = []
 
-        medicines: pd.DataFrame = medicines[~medicines['codigo'].isin(already_readed_codes)]
-        medicines: list[dict] = medicines.to_dict(orient="records")
+        registered_medicines: pd.DataFrame = registered_medicines[~registered_medicines['codigo'].isin(already_readed_registered_codes)]
+        registered_medicines: list[dict] = registered_medicines.to_dict(orient="records")
 
-        medicines_per_time: int = 10
+        notificated_medicines: pd.DataFrame = notificated_medicines[~notificated_medicines['codigoNotificacao'].isin(already_readed_notification_codes)]
+        notificated_medicines: list[dict] = notificated_medicines.to_dict(orient="records")
+
+        medicines = registered_medicines + notificated_medicines
+
+        medicines_per_time: int = self.PRESENTATIONS_PER_TIME_IN_GET_PRESENTATIONS
 
         print(len(medicines), " medicines to be readed")
         to_be_saved_after = len(medicines) - medicines_per_time
@@ -73,8 +86,9 @@ class GetRawDataAndSaveItAsIs():
         del medicines
         del presentations
         del alredy_saved_data
-        del already_readed_codes
-    
+        del already_readed_registered_codes
+        del already_readed_notification_codes
+
         if to_be_saved_after > 0:
             return self.extract_and_save_presentations_from_medicines(medicines_table=medicines_table)
         return "Finalizado"

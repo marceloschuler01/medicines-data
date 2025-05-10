@@ -52,7 +52,7 @@ class MockApiAnvisa:
             if (
                 _t['tipoAutorizacao'] == 'REGISTRADO' and _t['codigoProduto'] in codigos_medicamentos
                 ) or (
-                _t['tipoAutorizacao'] == 'NOTIFICADO' and _t['codigoNotificacao'] == codigo_notificacoes
+                _t['tipoAutorizacao'] == 'NOTIFICADO' and _t['codigoNotificacao'] in codigo_notificacoes
                 ):
                 response.append(_t)
 

@@ -195,6 +195,55 @@
     }
 },
 {
+    "ordem": 5163,
+    "produto": {
+        "codigo": 398,
+        "nome": "NASORIM",
+        "numeroRegistro": null,
+        "tipo": {
+            "codigo": null,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": "2033-07-06T00:00:00.000-0300",
+        "mesAnoVencimento": "072033",
+        "dataVencimentoRegistro": "2033-07-01T00:00:00.000-0300",
+        "principioAtivo": null,
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2023-07-06T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 1,
+            "descricao": "BAIXO RISCO"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "NOTIFICADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": "SOLUÇÃO DE CLORETO DE SÓDIO 0,9% C",
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 51673,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "07/2033",
+        "numeroRegistroFormatado": "         "
+    },
+    "empresa": {
+        "cnpj": "73856593000166",
+        "razaoSocial": "PRATI DONADUZZI & CIA LTDA",
+        "numeroAutorizacao": "1025685",
+        "cnpjFormatado": "73.856.593/0001-66"
+    },
+    "processo": {
+        "numero": null,
+        "situacao": 1,
+        "numeroProcessoFormatado": null
+    }
+},
+{
     "ordem": 7909,
     "produto": {
         "codigo": 1272538,
@@ -536,6 +585,54 @@
         "situacao": 29,
         "numeroProcessoFormatado": "25351.173557/2016-31"
     }
+},{
+    "ordem": 5504,
+    "produto": {
+        "codigo": 398,
+        "nome": "Nebzsol",
+        "numeroRegistro": null,
+        "tipo": {
+            "codigo": null,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": "2027-10-31T00:00:00.000-0300",
+        "mesAnoVencimento": "102027",
+        "dataVencimentoRegistro": "2027-10-01T00:00:00.000-0300",
+        "principioAtivo": null,
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2017-10-31T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 1,
+            "descricao": "BAIXO RISCO"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "NOTIFICADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": "SOLUÇÃO DE CLORETO DE SÓDIO 0,9% C",
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 30431,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "10/2027",
+        "numeroRegistroFormatado": "         "
+    },
+    "empresa": {
+        "cnpj": "60879848000164",
+        "razaoSocial": "LABORATORIO TAYUYNA LTDA",
+        "numeroAutorizacao": "1002104",
+        "cnpjFormatado": "60.879.848/0001-64"
+    },
+    "processo": {
+        "numero": null,
+        "situacao": 1,
+        "numeroProcessoFormatado": null
+    }
 },
 {
     "ordem": 7957,
@@ -633,6 +730,55 @@
         "numero": "25351731354201371",
         "situacao": 29,
         "numeroProcessoFormatado": "25351.731354/2013-71"
+    }
+},
+{
+    "ordem": 5197,
+    "produto": {
+        "codigo": 398,
+        "nome": "NEEDS",
+        "numeroRegistro": null,
+        "tipo": {
+            "codigo": null,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": "2031-11-16T00:00:00.000-0300",
+        "mesAnoVencimento": "112031",
+        "dataVencimentoRegistro": "2031-11-01T00:00:00.000-0300",
+        "principioAtivo": null,
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2021-11-16T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 1,
+            "descricao": "BAIXO RISCO"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "NOTIFICADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": "SOLUÇÃO DE CLORETO DE SÓDIO 0,9% C",
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 45393,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "11/2031",
+        "numeroRegistroFormatado": "         "
+    },
+    "empresa": {
+        "cnpj": "78950011000120",
+        "razaoSocial": "HERBARIUM LABORATORIO BOTANICO LTDA",
+        "numeroAutorizacao": "1018606",
+        "cnpjFormatado": "78.950.011/0001-20"
+    },
+    "processo": {
+        "numero": null,
+        "situacao": 1,
+        "numeroProcessoFormatado": null
     }
 },
 {

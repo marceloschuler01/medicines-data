@@ -23915,5 +23915,263 @@
         "indicacoes": "",
         "codigoCategoriaRegulatoria": 5,
         "dataCancelamento": null
+    },
+    {
+        "codigoProduto": 398,
+        "codigoNotificacao": 51673,
+        "tipoProduto": null,
+        "dataProduto": "2017-08-17T17:26:20.000-0300",
+        "nomeComercial": "Stongel VS",
+        "classesTerapeuticas": [],
+        "atcs": [],
+        "numeroRegistro": null,
+        "dataVencimento": "2027-08-17T00:00:00.000-0300",
+        "mesAnoVencimento": "082027",
+        "codigoParecerPublico": null,
+        "codigoBulaPaciente": null,
+        "codigoBulaProfissional": null,
+        "dataVencimentoRegistro": "2027-08-01T00:00:00.000-0300",
+        "principioAtivo": "HIDRÓXIDO DE MAGNÉSIO 200 MG + HIDRÓXIDO DE ALUMÍNIO 200 MG (COMPRIMIDO MASTIGÁVEL) C",
+        "medicamentoReferencia": null,
+        "categoriaRegulatoria": "BAIXO RISCO",
+        "classeTerapeutica": null,
+        "atc": null,
+        "tipoPriorizacao": "",
+        "complemento": null,
+        "descricaoMedicamentoNotificado": "HIDRÓXIDO DE MAGNÉSIO 200 MG + HIDRÓXIDO DE ALUMÍNIO 200 MG (COMPRIMIDO MASTIGÁVEL) C",
+        "categoriaMedicamentoNotificado": null,
+        "processosMedidaCautelar": [],
+        "empresa": {
+            "cnpj": "44010437000181",
+            "razaoSocial": "CAZI QUIMICA FARMACEUTICA INDUSTRIA E COMERCIO LTDA",
+            "numeroAutorizacao": "1007151"
+        },
+        "processo": {
+            "numero": null,
+            "situacao": 1
+        },
+        "apresentacoes": [],
+        "acondicionamentos": [
+            {
+                "codigo": 32615,
+                "apresentacao": "200 mg + 200 mg com fr vd trans x 50",
+                "dsValidade": "24",
+                "volume": "50",
+                "unidadeMedida": null,
+                "insumos": "HIDRÓXIDO DE MAGNÉSIO 200 MG + HIDRÓXIDO DE ALUMÍNIO 200 MG (COMPRIMIDO MASTIGÁVEL) D",
+                "principiosAtivos": "HIDRÓXIDO DE MAGNÉSIO 200 MG + HIDRÓXIDO DE ALUMÍNIO 200 MG (COMPRIMIDO MASTIGÁVEL) C",
+                "embalagemPrimaria": {
+                    "tipo": "6331",
+                    "observacao": "Frasco de vidro transparente "
+                },
+                "embalagemSecundaria": {
+                    "tipo": "6294",
+                    "observacao": "Cartucho"
+                },
+                "fabricantesNacionais": [
+                    {
+                        "fabricante": "CAZI QUIMICA FARMACEUTICA INDUSTRIA E COMERCIO LTDA",
+                        "cnpj": "44010437000181",
+                        "pais": "BRASIL",
+                        "uf": "SP",
+                        "cidade": "JANDIRA",
+                        "etapaFabricacao": "Processo produtivo completo "
+                    }
+                ],
+                "fabricantesInternacionais": []
+            }
+        ],
+        "rotulos": [],
+        "anexoRotulos": [
+            {
+                "codigoAnexo": 4865,
+                "nomeAnexo": "Lay out_Stongel VS.pdf",
+                "tipoArquivo": "pdf",
+                "origem": null
+            }
+        ],
+        "existeBula": false,
+        "tipoAutorizacao": "NOTIFICADO",
+        "processoMatriz": {
+            "nomeProduto": null,
+            "codProduto": null
+        },
+        "isProcessoClone": false,
+        "sinonimos": "-",
+        "indicacoes": "Tratamento dos sintomas da acidez estomacal, azia, desconforto estomacal, dor de estômago, dispepsia (indigestão), queimação, esofagite péptica (inflamação do esôfago, causada pelo refluxo gástrico) e hérnia de hiato.",
+        "codigoCategoriaRegulatoria": 1,
+        "dataCancelamento": null
+    },
+    {
+        "codigoProduto": 398,
+        "codigoNotificacao": 30431,
+        "tipoProduto": null,
+        "dataProduto": "2017-08-17T17:26:20.000-0300",
+        "nomeComercial": "Stongel VS",
+        "classesTerapeuticas": [],
+        "atcs": [],
+        "numeroRegistro": null,
+        "dataVencimento": "2027-08-17T00:00:00.000-0300",
+        "mesAnoVencimento": "082027",
+        "codigoParecerPublico": null,
+        "codigoBulaPaciente": null,
+        "codigoBulaProfissional": null,
+        "dataVencimentoRegistro": "2027-08-01T00:00:00.000-0300",
+        "principioAtivo": "HIDRÓXIDO DE MAGNÉSIO 200 MG + HIDRÓXIDO DE ALUMÍNIO 200 MG (COMPRIMIDO MASTIGÁVEL) C",
+        "medicamentoReferencia": null,
+        "categoriaRegulatoria": "BAIXO RISCO",
+        "classeTerapeutica": null,
+        "atc": null,
+        "tipoPriorizacao": "",
+        "complemento": null,
+        "descricaoMedicamentoNotificado": "HIDRÓXIDO DE MAGNÉSIO 200 MG + HIDRÓXIDO DE ALUMÍNIO 200 MG (COMPRIMIDO MASTIGÁVEL) C",
+        "categoriaMedicamentoNotificado": null,
+        "processosMedidaCautelar": [],
+        "empresa": {
+            "cnpj": "44010437000181",
+            "razaoSocial": "CAZI QUIMICA FARMACEUTICA INDUSTRIA E COMERCIO LTDA",
+            "numeroAutorizacao": "1007151"
+        },
+        "processo": {
+            "numero": null,
+            "situacao": 1
+        },
+        "apresentacoes": [],
+        "acondicionamentos": [
+            {
+                "codigo": 32615,
+                "apresentacao": "200 mg + 200 mg com fr vd trans x 50",
+                "dsValidade": "24",
+                "volume": "50",
+                "unidadeMedida": null,
+                "insumos": "HIDRÓXIDO DE MAGNÉSIO 200 MG + HIDRÓXIDO DE ALUMÍNIO 200 MG (COMPRIMIDO MASTIGÁVEL) D",
+                "principiosAtivos": "HIDRÓXIDO DE MAGNÉSIO 200 MG + HIDRÓXIDO DE ALUMÍNIO 200 MG (COMPRIMIDO MASTIGÁVEL) C",
+                "embalagemPrimaria": {
+                    "tipo": "6331",
+                    "observacao": "Frasco de vidro transparente "
+                },
+                "embalagemSecundaria": {
+                    "tipo": "6294",
+                    "observacao": "Cartucho"
+                },
+                "fabricantesNacionais": [
+                    {
+                        "fabricante": "CAZI QUIMICA FARMACEUTICA INDUSTRIA E COMERCIO LTDA",
+                        "cnpj": "44010437000181",
+                        "pais": "BRASIL",
+                        "uf": "SP",
+                        "cidade": "JANDIRA",
+                        "etapaFabricacao": "Processo produtivo completo "
+                    }
+                ],
+                "fabricantesInternacionais": []
+            }
+        ],
+        "rotulos": [],
+        "anexoRotulos": [
+            {
+                "codigoAnexo": 4865,
+                "nomeAnexo": "Lay out_Stongel VS.pdf",
+                "tipoArquivo": "pdf",
+                "origem": null
+            }
+        ],
+        "existeBula": false,
+        "tipoAutorizacao": "NOTIFICADO",
+        "processoMatriz": {
+            "nomeProduto": null,
+            "codProduto": null
+        },
+        "isProcessoClone": false,
+        "sinonimos": "-",
+        "indicacoes": "Tratamento dos sintomas da acidez estomacal, azia, desconforto estomacal, dor de estômago, dispepsia (indigestão), queimação, esofagite péptica (inflamação do esôfago, causada pelo refluxo gástrico) e hérnia de hiato.",
+        "codigoCategoriaRegulatoria": 1,
+        "dataCancelamento": null
+    },
+    {
+        "codigoProduto": 398,
+        "codigoNotificacao": 45393,
+        "tipoProduto": null,
+        "dataProduto": "2017-08-17T17:26:20.000-0300",
+        "nomeComercial": "Stongel VS",
+        "classesTerapeuticas": [],
+        "atcs": [],
+        "numeroRegistro": null,
+        "dataVencimento": "2027-08-17T00:00:00.000-0300",
+        "mesAnoVencimento": "082027",
+        "codigoParecerPublico": null,
+        "codigoBulaPaciente": null,
+        "codigoBulaProfissional": null,
+        "dataVencimentoRegistro": "2027-08-01T00:00:00.000-0300",
+        "principioAtivo": "HIDRÓXIDO DE MAGNÉSIO 200 MG + HIDRÓXIDO DE ALUMÍNIO 200 MG (COMPRIMIDO MASTIGÁVEL) C",
+        "medicamentoReferencia": null,
+        "categoriaRegulatoria": "BAIXO RISCO",
+        "classeTerapeutica": null,
+        "atc": null,
+        "tipoPriorizacao": "",
+        "complemento": null,
+        "descricaoMedicamentoNotificado": "HIDRÓXIDO DE MAGNÉSIO 200 MG + HIDRÓXIDO DE ALUMÍNIO 200 MG (COMPRIMIDO MASTIGÁVEL) C",
+        "categoriaMedicamentoNotificado": null,
+        "processosMedidaCautelar": [],
+        "empresa": {
+            "cnpj": "44010437000181",
+            "razaoSocial": "CAZI QUIMICA FARMACEUTICA INDUSTRIA E COMERCIO LTDA",
+            "numeroAutorizacao": "1007151"
+        },
+        "processo": {
+            "numero": null,
+            "situacao": 1
+        },
+        "apresentacoes": [],
+        "acondicionamentos": [
+            {
+                "codigo": 32615,
+                "apresentacao": "200 mg + 200 mg com fr vd trans x 50",
+                "dsValidade": "24",
+                "volume": "50",
+                "unidadeMedida": null,
+                "insumos": "HIDRÓXIDO DE MAGNÉSIO 200 MG + HIDRÓXIDO DE ALUMÍNIO 200 MG (COMPRIMIDO MASTIGÁVEL) D",
+                "principiosAtivos": "HIDRÓXIDO DE MAGNÉSIO 200 MG + HIDRÓXIDO DE ALUMÍNIO 200 MG (COMPRIMIDO MASTIGÁVEL) C",
+                "embalagemPrimaria": {
+                    "tipo": "6331",
+                    "observacao": "Frasco de vidro transparente "
+                },
+                "embalagemSecundaria": {
+                    "tipo": "6294",
+                    "observacao": "Cartucho"
+                },
+                "fabricantesNacionais": [
+                    {
+                        "fabricante": "CAZI QUIMICA FARMACEUTICA INDUSTRIA E COMERCIO LTDA",
+                        "cnpj": "44010437000181",
+                        "pais": "BRASIL",
+                        "uf": "SP",
+                        "cidade": "JANDIRA",
+                        "etapaFabricacao": "Processo produtivo completo "
+                    }
+                ],
+                "fabricantesInternacionais": []
+            }
+        ],
+        "rotulos": [],
+        "anexoRotulos": [
+            {
+                "codigoAnexo": 4865,
+                "nomeAnexo": "Lay out_Stongel VS.pdf",
+                "tipoArquivo": "pdf",
+                "origem": null
+            }
+        ],
+        "existeBula": false,
+        "tipoAutorizacao": "NOTIFICADO",
+        "processoMatriz": {
+            "nomeProduto": null,
+            "codProduto": null
+        },
+        "isProcessoClone": false,
+        "sinonimos": "-",
+        "indicacoes": "Tratamento dos sintomas da acidez estomacal, azia, desconforto estomacal, dor de estômago, dispepsia (indigestão), queimação, esofagite péptica (inflamação do esôfago, causada pelo refluxo gástrico) e hérnia de hiato.",
+        "codigoCategoriaRegulatoria": 1,
+        "dataCancelamento": null
     }
 ]
