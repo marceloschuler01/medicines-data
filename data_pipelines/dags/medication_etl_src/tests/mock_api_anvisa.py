@@ -11,24 +11,25 @@ class MockApiAnvisa:
     BASE_URL = "https://consultas.anvisa.gov.br/api"
     MAX_RETRIES = 2
     ENDPOINT_MEDICAMENTOS = "/consulta/medicamento/produtos"
+    MOCKS_PATH = "C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/medication_etl_src/tests/mocks/"
 
     def __init__(self):
         pass
 
     def get_active_medicines(self) -> list[Medicine]:
 
-        with open("C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/medication_etl_src/tests/mocks/mock_medicines_anvisa.json", 'r', encoding='utf-8') as f:
+        with open(self.MOCKS_PATH+"mock_medicines_anvisa.json", 'r', encoding='utf-8') as f:
             data = json.load(f)
         
         return data
 
     def get_inactive_medicines(self):
 
-        with open("C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/medication_etl_src/tests/mocks/mock_medicines_anvisa.json", 'r', encoding='utf-8') as f:
+        with open(self.MOCKS_PATH+"mock_medicines_anvisa.json", 'r', encoding='utf-8') as f:
             data = json.load(f)
         
         for produto in data:
-            produto['produto']['tipoAutorizacao'] = 'Inativo'
+            produto['produto']['situacaoApresentacao'] = 'Inativo'
 
         return data
 
@@ -44,7 +45,7 @@ class MockApiAnvisa:
                 codigo_notificacoes.append(medicine['codigoNotificacao'])
 
         response = []
-        with open("C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/medication_etl_src/tests/mocks/mock_presentations_anvisa.json", 'r', encoding='utf-8') as f:
+        with open(self.MOCKS_PATH+"mock_presentations_anvisa.json", 'r', encoding='utf-8') as f:
             data = json.load(f)
 
         for _t in data:

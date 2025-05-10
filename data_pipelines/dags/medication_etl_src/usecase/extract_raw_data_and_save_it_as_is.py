@@ -5,21 +5,21 @@ import json
 import pandas as pd
 import random
 
+PATH_TO_SAVE_DATA="C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/temp_files/"
+
 class GetRawDataAndSaveItAsIs():
 
-    #PATH_TO_SAVE_DATA=sys.path[1]+"\\dags\\medication_etl_src\\temp_files\\"
-    PATH_TO_SAVE_DATA="C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/temp_files/"
-
-    def __init__(self, api=ApiAnvisa):
+    def __init__(self, api=ApiAnvisa, path_to_save_data=None):
         self.api = api()
+        self.PATH_TO_SAVE_DATA = path_to_save_data or PATH_TO_SAVE_DATA
 
     def get_raw_data_and_save_it_as_is(self):
 
-        #self.extract_and_save_active_medicines_data()
-        #self.extract_and_save_inactive_medicines_data()
+        self.extract_and_save_active_medicines_data()
+        self.extract_and_save_inactive_medicines_data()
         #self.extract_and_save_regulatory_category()
         #self.extract_and_save_pharmaceutic_forms()
-        #self.extract_and_save_presentations()
+        self.extract_and_save_presentations()
         self.extract_and_save_presentations_from_inactive_medicines()
 
     def extract_and_save_active_medicines_data(self):
@@ -35,13 +35,13 @@ class GetRawDataAndSaveItAsIs():
     def extract_and_save_presentations(self):
 
         # From active medicines
-        with open('C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/temp_files/2025-03-30active_medicines.json', 'r', encoding="utf8") as f:
+        with open(self.PATH_TO_SAVE_DATA+self.get_current_date_as_str()+'active_medicines.json', 'r', encoding="utf8") as f:
             medicines = json.load(f)
-            medicines = [{'codigo': m['produto']['codigo'], 'codigoNotificacao': m['produto']['codigoNotificacao']} for m in medicines]
+            medicines = [{'codigo': m['produto']['codigo'], 'codigoNotificacao': m['produto']['codigoNotificacao'], 'tipoAutorizacao': m['produto']['tipoAutorizacao']} for m in medicines]
             medicines = pd.DataFrame(medicines)
 
         try:
-            with open('C:/Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/temp_files/2025-03-30presentations_from_active_medicines.json', 'r', encoding="utf8") as f:
+            with open(self.PATH_TO_SAVE_DATA+self.get_current_date_as_str()+'presentations_from_active_medicines.json', 'r', encoding="utf8") as f:
                 alredy_saved_data = json.load(f)
                 already_readed_codes = set([m['codigoProduto'] for m in alredy_saved_data])
         except FileNotFoundError:
@@ -51,7 +51,7 @@ class GetRawDataAndSaveItAsIs():
         #medicine_codes: list = list(medicine_codes - already_readed_codes)
         medicines: pd.DataFrame = medicines[~medicines['codigo'].isin(already_readed_codes)]
         medicines: list[dict] = medicines.to_dict(orient="records")
-        random.shuffle(medicines)
+        #random.shuffle(medicines)
 
         medicines_per_time: int = 100
 
@@ -77,13 +77,13 @@ class GetRawDataAndSaveItAsIs():
     def extract_and_save_presentations_from_inactive_medicines(self):
 
         # From active medicines
-        with open('C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/temp_files/2025-03-30inactive_medicines.json', 'r', encoding="utf8") as f:
+        with open(self.PATH_TO_SAVE_DATA+self.get_current_date_as_str()+'inactive_medicines.json', 'r', encoding="utf8") as f:
             medicines = json.load(f)
-            medicines = [{'codigo': m['produto']['codigo'], 'codigoNotificacao': m['produto']['codigoNotificacao']} for m in medicines]
+            medicines = [{'codigo': m['produto']['codigo'], 'codigoNotificacao': m['produto']['codigoNotificacao'], 'tipoAutorizacao': m['produto']['tipoAutorizacao']} for m in medicines]
             medicines = pd.DataFrame(medicines)
 
         try:
-            with open('C:/Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/temp_files/2025-03-30presentations_from_inactive_medicines.json', 'r', encoding="utf8") as f:
+            with open(self.PATH_TO_SAVE_DATA+self.get_current_date_as_str()+'presentations_from_inactive_medicines.json', 'r', encoding="utf8") as f:
                 alredy_saved_data = json.load(f)
                 already_readed_codes = set([m['codigoProduto'] for m in alredy_saved_data])
         except FileNotFoundError:
@@ -93,9 +93,9 @@ class GetRawDataAndSaveItAsIs():
         #medicine_codes: list = list(medicine_codes - already_readed_codes)
         medicines: pd.DataFrame = medicines[~medicines['codigo'].isin(already_readed_codes)]
         medicines: list[dict] = medicines.to_dict(orient="records")
-        random.shuffle(medicines)
+        #random.shuffle(medicines)
 
-        medicines_per_time: int = 300
+        medicines_per_time: int = 10
 
         print(len(medicines), " medicines to be readed")
         to_be_saved_after = len(medicines) - medicines_per_time
@@ -135,4 +135,4 @@ class GetRawDataAndSaveItAsIs():
     def get_current_date_as_str(self) -> str:
 
         #return datetime.date.today().strftime("%Y-%m-%d")
-        return "2025-03-30"
+        return "2025-04-10"

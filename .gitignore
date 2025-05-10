@@ -2,3 +2,6 @@ venv
 docker-spark-iceberg
 *.ipynb_checkpoints
 __pycache__/
+jupytest/
+*.csv
+data_pipelines/dags/jupyters/

@@ -1,8 +1,7 @@
 apache-airflow==2.10.2
 pandas==2.2.3
-sql_alchemy==3.1.1
 psycopg2==2.9.10
 xlrd==2.0.1
 blinker==1.7.0
-stealth_requests=1.2.1
+stealth_requests==1.2.1
 openpyxl==3.1.5
