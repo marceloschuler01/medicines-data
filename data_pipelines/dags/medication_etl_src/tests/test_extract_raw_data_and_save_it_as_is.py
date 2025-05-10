@@ -51,7 +51,7 @@ class TestExtractRawDataAndSaveItAsIs(unittest.TestCase):
             presentations = json.load(f)
         
         expected_presentations = mock_anvisa.get_presentations(medicines=[med['produto'] for med in medicines])
-        self.assertListEqual(presentations, expected_presentations)
+        self.assertListEqual(sorted(presentations, key=lambda x: x['codigoProduto']), sorted(expected_presentations, key=lambda x: x['codigoProduto']))
 
         # inactive medicines
         with open(uc.PATH_TO_SAVE_DATA+uc.get_current_date_as_str()+'inactive_medicines.json', 'r', encoding="utf8") as f:
