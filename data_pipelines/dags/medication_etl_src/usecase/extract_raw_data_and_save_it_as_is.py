@@ -50,18 +50,30 @@ class GetRawDataAndSaveItAsIs():
 
         try:
             with open(self.PATH_TO_SAVE_DATA+self.get_current_date_as_str()+'presentations_from_'+medicines_table+'.json', 'r', encoding="utf8") as f:
-                alredy_saved_data = json.load(f)
-
-                already_saved_registered_medicines = [m for m in alredy_saved_data if m['tipoAutorizacao'] != "NOTIFICADO"]
-                already_saved_notificated_medicines = [m for m in alredy_saved_data if m['tipoAutorizacao'] == "NOTIFICADO"]
-                already_readed_registered_codes = set([m['codigoProduto'] for m in already_saved_registered_medicines])
-                already_readed_notification_codes = set([m['codigoNotificacao'] for m in already_saved_notificated_medicines])
-        
+                alredy_saved_medicines = json.load(f)
         except FileNotFoundError:
-            alredy_saved_data = []
-            
-            already_readed_registered_codes = []
-            already_readed_notification_codes = []
+            alredy_saved_medicines = []
+
+
+        try:
+            with open(self.PATH_TO_SAVE_DATA+self.get_current_date_as_str()+medicines_table+'_presentation_error.json', 'r', encoding="utf8") as f:
+                alredy_saved_errors= json.load(f)
+        except FileNotFoundError:
+            alredy_saved_errors = []
+
+        for item in alredy_saved_errors:
+            if 'codigoProduto' not in item:
+                item['codigoProduto'] = item['codigo']
+        alredy_saved_data = alredy_saved_medicines + alredy_saved_errors
+
+        already_saved_registered_medicines = [m for m in alredy_saved_data if m['tipoAutorizacao'] != "NOTIFICADO"]
+        already_saved_notificated_medicines = [m for m in alredy_saved_data if m['tipoAutorizacao'] == "NOTIFICADO"]
+        already_readed_registered_codes = set([m['codigoProduto'] for m in already_saved_registered_medicines])
+        already_readed_notification_codes = set([m['codigoNotificacao'] for m in already_saved_notificated_medicines])
+
+        for item in alredy_saved_errors:
+            if 'codigoProduto' in item:
+                del item['codigoProduto']
 
         registered_medicines: pd.DataFrame = registered_medicines[~registered_medicines['codigo'].isin(already_readed_registered_codes)]
         registered_medicines: list[dict] = registered_medicines.to_dict(orient="records")
@@ -78,14 +90,17 @@ class GetRawDataAndSaveItAsIs():
 
         medicines = medicines[:medicines_per_time] if len(medicines) > medicines_per_time else medicines
 
-        presentations = self.api.get_presentations(medicines=medicines)
+        presentations, errors = self.api.get_presentations(medicines=medicines)
         if presentations:
-            self.save_json(data=alredy_saved_data+presentations, filename='presentations_from_'+medicines_table+'.json')
+            self.save_json(data=alredy_saved_medicines+presentations, filename='presentations_from_'+medicines_table+'.json')
+        self.save_json(data=alredy_saved_errors+errors, filename=medicines_table+'_presentation_error.json')
 
         # del variables before call recursive function
         del medicines
         del presentations
         del alredy_saved_data
+        del alredy_saved_errors
+        del alredy_saved_medicines
         del already_readed_registered_codes
         del already_readed_notification_codes
 
@@ -113,4 +128,4 @@ class GetRawDataAndSaveItAsIs():
     def get_current_date_as_str(self) -> str:
 
         #return datetime.date.today().strftime("%Y-%m-%d")
-        return "2025-04-10"
+        return "2025-05-10"

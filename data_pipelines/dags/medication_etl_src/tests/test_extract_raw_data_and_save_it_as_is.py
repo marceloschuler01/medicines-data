@@ -51,7 +51,7 @@ class TestExtractRawDataAndSaveItAsIs(unittest.TestCase):
         with open(uc.PATH_TO_SAVE_DATA+uc.get_current_date_as_str()+'presentations_from_active_medicines.json', 'r', encoding="utf8") as f:
             presentations = json.load(f)
         
-        expected_presentations = mock_anvisa.get_presentations(medicines=[med['produto'] for med in medicines])
+        expected_presentations, errors = mock_anvisa.get_presentations(medicines=[med['produto'] for med in medicines])
         self.assertListEqual(sorted(presentations, key=lambda x: x['codigoProduto']), sorted(expected_presentations, key=lambda x: x['codigoProduto']))
 
         # inactive medicines
@@ -64,7 +64,7 @@ class TestExtractRawDataAndSaveItAsIs(unittest.TestCase):
         with open(uc.PATH_TO_SAVE_DATA+uc.get_current_date_as_str()+'presentations_from_inactive_medicines.json', 'r', encoding="utf8") as f:
             presentations = json.load(f)
 
-        expected_presentations = mock_anvisa.get_presentations(medicines=[med['produto'] for med in medicines])
+        expected_presentations, errors = mock_anvisa.get_presentations(medicines=[med['produto'] for med in medicines])
         self.assertListEqual(sorted(presentations, key=lambda x: x['codigoProduto']), sorted(expected_presentations, key=lambda x: x['codigoProduto']))
         
         # pharmaceutic forms
@@ -80,3 +80,68 @@ class TestExtractRawDataAndSaveItAsIs(unittest.TestCase):
 
         expected_result = mock_anvisa.get_regulation_category()
         self.assertListEqual(sorted(categories, key=lambda x: x['id']), sorted(expected_result, key=lambda x: x['id']))
+
+    def test_extract_and_save_presentations_with_errors(self):
+
+        uc = GetRawDataAndSaveItAsIs(api=MockApiAnvisa, path_to_save_data=self.path_to_save_temp_tests_files)
+        uc.PRESENTATIONS_PER_TIME_IN_GET_PRESENTATIONS = 2
+        uc.api.return_medicines_with_error = True
+        uc.get_raw_data_and_save_it_as_is()
+
+        mock_anvisa = MockApiAnvisa(return_medicines_with_error=True)
+
+        # active medicines
+        with open(uc.PATH_TO_SAVE_DATA+uc.get_current_date_as_str()+'active_medicines.json', 'r', encoding="utf8") as f:
+            medicines = json.load(f)
+
+        self.assertListEqual(medicines, mock_anvisa.get_active_medicines())
+
+        # active presentations
+        with open(uc.PATH_TO_SAVE_DATA+uc.get_current_date_as_str()+'presentations_from_active_medicines.json', 'r', encoding="utf8") as f:
+            presentations = json.load(f)
+
+        expected_presentations, errors = mock_anvisa.get_presentations(medicines=[med['produto'] for med in medicines])
+        self.assertListEqual(sorted(presentations, key=lambda x: x['codigoProduto']), sorted(expected_presentations, key=lambda x: x['codigoProduto']))
+
+        # errors from active presentations
+        with open(uc.PATH_TO_SAVE_DATA+uc.get_current_date_as_str()+'inactive_medicines_presentation_error.json', 'r', encoding="utf8") as f:
+            errors = json.load(f)
+
+        expected_presentations, expected_errors = mock_anvisa.get_presentations(medicines=[med['produto'] for med in medicines])
+        self.assertListEqual(sorted(presentations, key=lambda x: x['codigoProduto']), sorted(expected_presentations, key=lambda x: x['codigoProduto']))
+        expected_err = []
+        for err in expected_errors:
+            expected_err.append({
+                "codigo": err['codigo'],
+                'codigoNotificacao': err['codigoNotificacao'],
+                'tipoAutorizacao': err['tipoAutorizacao'],
+            })
+        self.assertListEqual(sorted(errors, key=lambda x: x['codigo']), sorted(expected_err, key=lambda x: x['codigo']))
+
+        # inactive medicines
+        with open(uc.PATH_TO_SAVE_DATA+uc.get_current_date_as_str()+'inactive_medicines.json', 'r', encoding="utf8") as f:
+            medicines = json.load(f)
+
+        self.assertListEqual(medicines, mock_anvisa.get_inactive_medicines())
+        
+        # inactive presentations
+        with open(uc.PATH_TO_SAVE_DATA+uc.get_current_date_as_str()+'presentations_from_inactive_medicines.json', 'r', encoding="utf8") as f:
+            presentations = json.load(f)
+
+        expected_presentations, errors = mock_anvisa.get_presentations(medicines=[med['produto'] for med in medicines])
+        self.assertListEqual(sorted(presentations, key=lambda x: x['codigoProduto']), sorted(expected_presentations, key=lambda x: x['codigoProduto']))
+
+        # errors from active presentations
+        with open(uc.PATH_TO_SAVE_DATA+uc.get_current_date_as_str()+'inactive_medicines_presentation_error.json', 'r', encoding="utf8") as f:
+            errors = json.load(f)
+
+        expected_presentations, expected_errors = mock_anvisa.get_presentations(medicines=[med['produto'] for med in medicines])
+        self.assertListEqual(sorted(presentations, key=lambda x: x['codigoProduto']), sorted(expected_presentations, key=lambda x: x['codigoProduto']))
+        expected_err = []
+        for err in expected_errors:
+            expected_err.append({
+                "codigo": err['codigo'],
+                'codigoNotificacao': err['codigoNotificacao'],
+                'tipoAutorizacao': err['tipoAutorizacao'],
+            })
+        self.assertListEqual(sorted(errors, key=lambda x: x['codigo']), sorted(expected_err, key=lambda x: x['codigo']))

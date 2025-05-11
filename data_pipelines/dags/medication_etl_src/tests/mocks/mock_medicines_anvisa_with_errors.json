@@ -46,6 +46,54 @@
         "situacao": 29,
         "numeroProcessoFormatado": "25351.025814/2003-59"
     }
+},{
+    "ordem": 22998,
+    "produto": {
+        "codigo": 358,
+        "nome": "calicida rioquimica",
+        "numeroRegistro": null,
+        "tipo": {
+            "codigo": null,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": null,
+        "mesAnoVencimento": null,
+        "dataVencimentoRegistro": null,
+        "principioAtivo": null,
+        "situacaoApresentacao": "Inativo",
+        "dataRegistro": "2013-03-05T09:49:11.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 1,
+            "descricao": "BAIXO RISCO"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "NOTIFICADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": "COLÓDIO LACTO-SALICILADO 20% (SOLUÇÃO) C",
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 15841,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "",
+        "numeroRegistroFormatado": "         "
+    },
+    "empresa": {
+        "cnpj": "55643555000143",
+        "razaoSocial": "RIOQUIMICA S.A.",
+        "numeroAutorizacao": "1015201",
+        "cnpjFormatado": "55.643.555/0001-43"
+    },
+    "processo": {
+        "numero": null,
+        "situacao": 2,
+        "numeroProcessoFormatado": null
+    }
 },
 {
     "ordem": 7913,
@@ -635,6 +683,55 @@
     }
 },
 {
+    "ordem": 7957,
+    "produto": {
+        "codigo": 8554,
+        "nome": "VONAUGASMAX",
+        "numeroRegistro": null,
+        "tipo": {
+            "codigo": null,
+            "descricao": null
+        },
+        "categoria": null,
+        "situacaoRotulo": null,
+        "dataVencimento": "2032-11-28T00:00:00.000-0300",
+        "mesAnoVencimento": "112032",
+        "dataVencimentoRegistro": "2032-11-01T00:00:00.000-0300",
+        "principioAtivo": null,
+        "situacaoApresentacao": "Ativo",
+        "dataRegistro": "2022-11-28T00:00:00.000-0300",
+        "categoriaRegulatoria": {
+            "codigo": 1,
+            "descricao": "BAIXO RISCO"
+        },
+        "medicamentoReferencia": null,
+        "categoriaProduto": null,
+        "complemento": null,
+        "tipoAutorizacao": "NOTIFICADO",
+        "tipoPriorizacao": null,
+        "descricaoMedicamentoNotificado": "SIMETICONA 250 MG (CÁPSULA MOLE) C",
+        "categoriaMedicamentoNotificado": null,
+        "codigoNotificacao": 49756,
+        "sinonimos": null,
+        "indicacoes": null,
+        "dataCancelamento": null,
+        "acancelar": false,
+        "mesAnoVencimentoFormatado": "11/2032",
+        "numeroRegistroFormatado": "         "
+    },
+    "empresa": {
+        "cnpj": "49475833001412",
+        "razaoSocial": "BIOLAB SANUS FARMACEUTICA LTDA",
+        "numeroAutorizacao": null,
+        "cnpjFormatado": "49.475.833/0014-12"
+    },
+    "processo": {
+        "numero": null,
+        "situacao": 1,
+        "numeroProcessoFormatado": null
+    }
+},
+{
     "ordem": 7962,
     "produto": {
         "codigo": 998133,
@@ -781,6 +878,55 @@
         "numeroProcessoFormatado": "25351.153822/2016-93"
     }
 },
+    {
+        "ordem": 13822,
+        "produto": {
+            "codigo": 145690,
+            "nome": "MENOP",
+            "numeroRegistro": "118610226",
+            "tipo": {
+                "codigo": 1,
+                "descricao": null
+            },
+            "categoria": null,
+            "situacaoRotulo": null,
+            "dataVencimento": null,
+            "mesAnoVencimento": "042013",
+            "dataVencimentoRegistro": "2013-04-01T00:00:00.000-0300",
+            "principioAtivo": "GLYCINE MAX, GLYCINE MAX (L.) MERR.",
+            "situacaoApresentacao": "Inativo",
+            "dataRegistro": "2002-12-24T00:00:00.000-0300",
+            "categoriaRegulatoria": {
+                "codigo": 4,
+                "descricao": "Fitoterápico"
+            },
+            "medicamentoReferencia": null,
+            "categoriaProduto": null,
+            "complemento": null,
+            "tipoAutorizacao": "REGISTRADO",
+            "tipoPriorizacao": null,
+            "descricaoMedicamentoNotificado": null,
+            "categoriaMedicamentoNotificado": null,
+            "codigoNotificacao": 0,
+            "sinonimos": null,
+            "indicacoes": null,
+            "dataCancelamento": null,
+            "acancelar": false,
+            "mesAnoVencimentoFormatado": "04/2013",
+            "numeroRegistroFormatado": "118610226"
+        },
+        "empresa": {
+            "cnpj": "64088172000141",
+            "razaoSocial": "ATIVUS FARMACÊUTICA LTDA",
+            "numeroAutorizacao": null,
+            "cnpjFormatado": "64.088.172/0001-41"
+        },
+        "processo": {
+            "numero": "25351206174200203",
+            "situacao": null,
+            "numeroProcessoFormatado": "25351.206174/2002-03"
+        }
+    },
 {
     "ordem": 7965,
     "produto": {

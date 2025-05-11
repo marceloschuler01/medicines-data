@@ -13,19 +13,32 @@ class MockApiAnvisa:
     ENDPOINT_MEDICAMENTOS = "/consulta/medicamento/produtos"
     MOCKS_PATH = "C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/medication_etl_src/tests/mocks/"
 
-    def __init__(self):
-        pass
+    MEDICINES_WITH_ERROR = [145690, 22998,]
+    NOTIFICATIONS_WITH_ERROR = [49756, 15841]
+
+    def __init__(self, return_medicines_with_error=False):
+        self.return_medicines_with_error = return_medicines_with_error
 
     def get_active_medicines(self) -> list[Medicine]:
 
-        with open(self.MOCKS_PATH+"mock_medicines_anvisa.json", 'r', encoding='utf-8') as f:
+        if self.return_medicines_with_error:
+            path = self.MOCKS_PATH+"mock_medicines_anvisa_with_errors.json"
+        else:
+            path = self.MOCKS_PATH+"mock_medicines_anvisa.json"
+
+        with open(path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        
+
         return data
 
     def get_inactive_medicines(self):
 
-        with open(self.MOCKS_PATH+"mock_medicines_anvisa.json", 'r', encoding='utf-8') as f:
+        if self.return_medicines_with_error:
+            path = self.MOCKS_PATH+"mock_medicines_anvisa_with_errors.json"
+        else:
+            path = self.MOCKS_PATH+"mock_medicines_anvisa.json"
+
+        with open(path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
         for produto in data:
@@ -33,7 +46,9 @@ class MockApiAnvisa:
 
         return data
 
-    def get_presentations(self, medicines: list[dict]) -> list:
+    def get_presentations(self, medicines: list[dict]) -> tuple[list, list]:
+
+        errors = []
 
         codigos_medicamentos = []
         codigo_notificacoes = []
@@ -43,6 +58,12 @@ class MockApiAnvisa:
                 codigos_medicamentos.append(medicine['codigo'])
             else:
                 codigo_notificacoes.append(medicine['codigoNotificacao'])
+
+            if medicine['codigo'] in self.MEDICINES_WITH_ERROR:
+                errors.append(medicine)
+
+            if medicine['codigoNotificacao'] in self.NOTIFICATIONS_WITH_ERROR:
+                errors.append(medicine)
 
         response = []
         with open(self.MOCKS_PATH+"mock_presentations_anvisa.json", 'r', encoding='utf-8') as f:
@@ -56,7 +77,7 @@ class MockApiAnvisa:
                 ):
                 response.append(_t)
 
-        return response
+        return response, errors
 
     def get_regulation_category(self):
 

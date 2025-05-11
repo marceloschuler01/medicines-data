@@ -53,23 +53,12 @@ class ApiAnvisa:
     def get_presentations(self, medicines: list[dict]) -> list:
 
         result = []
+        errors = []
 
         total_medicines = len(medicines)
         i = 0
 
         with StealthSession() as session:
-
-            '''try:
-                # First get the home page to make requests more stealthy
-                session.get("https://consultas.anvisa.gov.br")
-                time.sleep(self._get_random_number(1, 3, 2))
-
-                # First get the home page to make requests more stealthy
-                session.get("https://consultas.anvisa.gov.br/api/empresa/funcionamento?column=&count=10&filter%5BtipoProduto%5D=1&order=asc&page=1")
-                time.sleep(self._get_random_number(1, 3, 2))
-            except Exception:
-                time.sleep(self._get_random_number(5, 10, 7))
-                pass'''
 
             while medicines:
 
@@ -78,17 +67,7 @@ class ApiAnvisa:
                 i += 1
 
                 print("Getting presentation ", i, "of ", total_medicines)
-
-                if i % random.randint(7, 15) == 0:
-                    sleep_time = self._get_random_number(0.5, 1, 0.7)
-                    print("Sleeping ", sleep_time, "seconds")
-                    time.sleep(sleep_time)
-                    # get the home page to make requests more stealthy
-                    try:
-                        session.get("https://consultas.anvisa.gov.br/api/empresa/funcionamento?column=&count=10&filter%5BtipoProduto%5D=1&order=asc&page=1")
-                    except Exception:
-                        time.sleep(self._get_random_number(5, 10, 7))
-                    time.sleep(random.random())
+                print("Getting presentation of: ", medicine)
 
                 sleep_time = self._get_random_number(0.1, 0.4, 0.2)
                 print("Sleeping ", sleep_time, "seconds")
@@ -111,11 +90,13 @@ class ApiAnvisa:
                         self._times_to_retry -= 1
                         
                         time.sleep(self._get_random_number(1, 3, 2))
-                        return result + self.get_presentations(medicines=medicines)
+                        r, e = self.get_presentations(medicines=medicines+[medicine])
+                        return result + r, errors + e
                     else:
-                        return result
+                        errors.append(medicine)
+                        return result, errors
 
-        return result
+        return result, errors
 
     @retry_decorator(retry_num=3, retry_sleep_sec=20)
     def get_regulation_category(self):

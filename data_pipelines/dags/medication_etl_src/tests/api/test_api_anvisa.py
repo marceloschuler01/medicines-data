@@ -1,6 +1,6 @@
 import unittest
-from api.api_anvisa import ApiAnvisa
-from utils.stealth_requests_wrapper import StealthSessionWrapper
+from medication_etl_src.api.api_anvisa import ApiAnvisa
+from medication_etl_src.utils.stealth_requests_wrapper import StealthSessionWrapper
 import time
 import numpy as np
 
@@ -150,9 +150,11 @@ class TestApiAnvisa(unittest.TestCase):
 
         time.sleep(self._get_random_number(1, 3, 2))
         import copy
-        presentations = api.get_presentations(medicines=copy.deepcopy(produtos))
+        presentations, errors = api.get_presentations(medicines=copy.deepcopy(produtos))
 
         self.assertEqual(len(presentations), 3)
+        self.assertIsInstance(errors, list)
+        self.assertEqual(len(errors), 0)
 
         self.assertEqual(presentations[0]['codigoProduto'], produtos[0]['codigo'])
         self.assertEqual(presentations[1]['codigoProduto'], produtos[1]['codigo'])
@@ -173,6 +175,70 @@ class TestApiAnvisa(unittest.TestCase):
         # Notificated medicines does not have presentations, but have acondicionamentos
         self.assertEqual(len(presentations[2]['apresentacoes']), 0)
         self.assertTrue(len(presentations[2]['acondicionamentos']) > 0)
+
+
+    def test_get_presentations_with_errors(self):
+
+        with_error_medicine = 145690
+
+        medicines = [{
+            "ordem": 1,
+            "produto": {
+                "codigo": 3652639,
+                "nome": "TYLENOL",
+                "numeroRegistro": "157211214",
+                "situacaoApresentacao": "Ativo",
+                "tipoAutorizacao": "REGISTRADO",
+                "codigoNotificacao": 0,
+            },
+        },{
+            "ordem": 2,
+            "produto": {
+                "codigo": with_error_medicine,
+                "nome": "MENOP",
+                "numeroRegistro": "118610226",
+                "situacaoApresentacao": "Inativo",
+                "tipoAutorizacao": "REGISTRADO",
+                "codigoNotificacao": 0,
+            },
+        },
+        {
+            "ordem": 3,
+            "produto": {
+                "codigo": 3651010,
+                "nome": "TYLENOL DC",
+                "numeroRegistro": "157211205",
+                "situacaoApresentacao": "Ativo",
+                "tipoAutorizacao": "REGISTRADO",
+                "codigoNotificacao": 0,
+            },
+        },
+        {
+            "ordem": 4,
+            "produto": {
+                "codigo": 8544,
+                "nome": "TYLENOL BEBÊ",
+                "situacaoApresentacao": "Ativo",
+                "tipoAutorizacao": "NOTIFICADO",
+                "codigoNotificacao": 53773,
+            },
+        }]
+
+        produtos = [medicine['produto'] for medicine in medicines]
+
+        api = ApiAnvisa()
+
+        time.sleep(self._get_random_number(1, 3, 2))
+        import copy
+        presentations, errors = api.get_presentations(medicines=copy.deepcopy(produtos))
+
+        self.assertEqual(len(presentations), 3)
+        self.assertIsInstance(errors, list)
+        self.assertEqual(len(errors), 1)
+
+        self.assertEqual(presentations[0]['codigoProduto'], produtos[0]['codigo'])
+        self.assertEqual(presentations[1]['codigoProduto'], produtos[2]['codigo'])
+        self.assertEqual(presentations[2]['codigoNotificacao'], produtos[3]['codigoNotificacao'])
 
     def _get_random_number(self, min_number=None, max_number=None, mode=None):
 
