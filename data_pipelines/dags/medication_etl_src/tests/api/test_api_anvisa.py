@@ -24,7 +24,7 @@ class TestApiAnvisa(unittest.TestCase):
             self.assertTrue('content' in result)
             content = result['content']
             self.assertIsInstance(content, list)
-            self.assertEquals(len(content), 10)
+            self.assertEqual(len(content), 10)
 
     def test_make_requests_with_pagination(self):
 
@@ -51,7 +51,7 @@ class TestApiAnvisa(unittest.TestCase):
             if len(expected_result) < 3:
                 raise Exception("Not a good test")
 
-            self.assertEquals(len(result), len(expected_result))
+            self.assertEqual(len(result), len(expected_result))
             self.assertListEqual(expected_result, result)
 
     def test_get_presentations(self):
