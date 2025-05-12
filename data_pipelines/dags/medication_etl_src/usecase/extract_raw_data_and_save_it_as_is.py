@@ -103,6 +103,9 @@ class GetRawDataAndSaveItAsIs():
         del alredy_saved_medicines
         del already_readed_registered_codes
         del already_readed_notification_codes
+        del registered_medicines
+        del notificated_medicines
+        del errors
 
         if to_be_saved_after > 0:
             return self.extract_and_save_presentations_from_medicines(medicines_table=medicines_table)
