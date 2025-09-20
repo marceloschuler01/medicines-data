@@ -9,7 +9,7 @@ class GetRawDataAndSaveItAsIs():
     def __init__(self, api=ApiAnvisa, path_to_save_data=None):
         self.api = api()
         self.PATH_TO_SAVE_DATA = path_to_save_data or PATH_TO_SAVE_DATA
-        self.PRESENTATIONS_PER_TIME_IN_GET_PRESENTATIONS: int = 200
+        self.PRESENTATIONS_PER_TIME_IN_GET_PRESENTATIONS: int = 800
 
     def get_raw_data_and_save_it_as_is(self):
 
