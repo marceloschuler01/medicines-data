@@ -1,11 +1,11 @@
 CREATE TABLE IF NOT EXISTS fabricante_nacional
 (
  id_fabricante_nacional uuid NOT NULL,
- nome                   varchar() NOT NULL,
- cnpj                   varchar() NOT NULL,
- uf                     varchar() NOT NULL,
- cidade                 varchar() NOT NULL,
- etapa_fabricacao       varchar() NOT NULL,
+ nome                   VARCHAR NOT NULL,
+ cnpj                   VARCHAR NOT NULL,
+ uf                     VARCHAR NOT NULL,
+ cidade                 VARCHAR NOT NULL,
+ etapa_fabricacao       VARCHAR NOT NULL,
  CONSTRAINT PK_13 PRIMARY KEY ( id_fabricante_nacional )
 );
 
