@@ -1,5 +1,5 @@
 import pandas as pd
-from medication_etl_src.entity.medicine import MedicineAnvisa
+from medication_etl_src.entity.anvisa_etities import MedicineAnvisa
 import json
 
 

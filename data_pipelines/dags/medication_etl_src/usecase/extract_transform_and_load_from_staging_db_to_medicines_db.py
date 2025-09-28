@@ -5,7 +5,7 @@ from dataclasses import asdict, dataclass
 
 from medication_etl_src.staging_db.staging_db import StagingDB
 from medication_etl_src.api.adapter.anvisa.anvisa_medicines_adapter import AnvisaMedicinesAdapter
-from medication_etl_src.entity.medicine import MedicineAnvisa
+from medication_etl_src.entity.anvisa_etities import MedicineAnvisa
 
 
 @dataclass

@@ -1,5 +1,5 @@
 from medication_etl_src.api.api_anvisa import ApiAnvisa
-from medication_etl_src.entity.medicine import MedicineAnvisa
+from medication_etl_src.entity.anvisa_etities import MedicineAnvisa
 import pandas as pd
 from dataclasses import asdict
 
