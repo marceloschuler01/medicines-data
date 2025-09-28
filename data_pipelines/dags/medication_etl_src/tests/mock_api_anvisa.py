@@ -1,5 +1,5 @@
 import pandas as pd
-from medication_etl_src.entity.medicine import Medicine
+from medication_etl_src.entity.medicine import MedicineAnvisa
 import json
 
 
@@ -19,7 +19,7 @@ class MockApiAnvisa:
     def __init__(self, return_medicines_with_error=False):
         self.return_medicines_with_error = return_medicines_with_error
 
-    def get_active_medicines(self) -> list[Medicine]:
+    def get_active_medicines(self) -> list[MedicineAnvisa]:
 
         if self.return_medicines_with_error:
             path = self.MOCKS_PATH+"mock_medicines_anvisa_with_errors.json"

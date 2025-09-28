@@ -1,5 +1,5 @@
 from medication_etl_src.api.api_anvisa import ApiAnvisa
-from medication_etl_src.entity.medicine import Medicine
+from medication_etl_src.entity.medicine import MedicineAnvisa
 import pandas as pd
 from dataclasses import asdict
 
@@ -11,6 +11,6 @@ class GetMedicinesInfoAndStoreAsCsv:
 
     def get_medicines_info_and_store_as_csv(self):
 
-        medicines: list[Medicine] = self.api.get_medicines()
+        medicines: list[MedicineAnvisa] = self.api.get_medicines()
         medicines_df: pd.DataFrame = pd.DataFrame.from_records([asdict(s) for s in medicines])
         medicines_df.to_csv("/opt/airflow/dags/csvs/TEMP.csv", index=False)

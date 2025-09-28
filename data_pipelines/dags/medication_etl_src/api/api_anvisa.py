@@ -1,6 +1,5 @@
 import pandas as pd
 import requests
-from medication_etl_src.entity.medicine import Medicine
 from medication_etl_src.api.adapter.anvisa.anvisa_medicines_adapter import AnvisaMedicinesAdapter
 from stealth_requests import StealthSession
 import random
@@ -25,7 +24,7 @@ class ApiAnvisa:
         self._times_to_retry: int=self.MAX_RETRIES
 
     @retry_decorator(retry_num=3, retry_sleep_sec=20)
-    def get_active_medicines(self) -> list[Medicine]:
+    def get_active_medicines(self) -> list[dict]:
 
         self._times_to_retry = 0
 

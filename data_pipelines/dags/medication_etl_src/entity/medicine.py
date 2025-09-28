@@ -1,18 +1,19 @@
 from dataclasses import dataclass
 
 @dataclass
-class Medicine:
+class MedicineAnvisa:
 
-    codigo_anvisa: str = None
-    nome_produto: str = None
-    numero_registro: str = None
-    numero_processo: str = None
-    principio_ativo: str = None
-    categoria_regulatoria: str = None
-    medicamento_referencia: str = None
-    cnpj_laboratorio: str = None
-    razao_social_laboratorio: str = None
-    registro_ativo: bool = None
-    data_registro: str = None
-    data_vencimento_registro: str = None
-    tipo_autorizacao: str = None
+    codigo_anvisa: str
+    codigo_notificacao_anvisa: str
+    nome_produto: str
+    numero_registro_anvisa: str
+    numero_processo_anvisa: str
+    tipo_autorizacao_anvisa: str
+    medicamento_referencia: str
+    empresa: dict
+    registro_ativo: str
+    data_registro_anvisa: str
+    sinonimos: str
+    data_vencimento_registro_anvisa: str
+    categoria_regulatoria: str
+
