@@ -56,22 +56,29 @@ class AnvisaApresentationsAdapter:
         
         apresentacoes = produtos[["codigo_anvisa", "apresentacoes"]]
         apresentacoes = apresentacoes.dropna(subset="apresentacoes")
-        apresentacoes = apresentacoes.explode("apresentacoes").reset_index(drop=True)
-        codigos_anvisa = apresentacoes["codigo_anvisa"].copy()
-        apresentacoes = pd.json_normalize(apresentacoes["apresentacoes"])
-        apresentacoes["codigo_anvisa_medicamento"] = codigos_anvisa
-        apresentacoes = apresentacoes[[k for k in self.APRESENTACOES_MAPPER]]
-        apresentacoes = apresentacoes.rename(columns=self.APRESENTACOES_MAPPER)
-        apresentacoes = apresentacoes.apply(lambda row: ApresentacaoAnvisa(**row), axis=1).tolist()
+        if not apresentacoes.empty:
+            apresentacoes = apresentacoes.explode("apresentacoes").reset_index(drop=True)
+            codigos_anvisa = apresentacoes["codigo_anvisa"].copy()
+            apresentacoes = pd.json_normalize(apresentacoes["apresentacoes"])
+            apresentacoes["codigo_anvisa_medicamento"] = codigos_anvisa
+            apresentacoes = apresentacoes[[k for k in self.APRESENTACOES_MAPPER]]
+            apresentacoes = apresentacoes.rename(columns=self.APRESENTACOES_MAPPER)
+            apresentacoes = apresentacoes.apply(lambda row: ApresentacaoAnvisa(**row), axis=1).tolist()
+        else:
+            apresentacoes = []
 
         acondicionamentos = produtos[["codigo_anvisa", "acondicionamentos"]]
-        acondicionamentos = acondicionamentos.explode("acondicionamentos").reset_index(drop=True)
-        codigos_anvisa = acondicionamentos["codigo_anvisa"].copy()
-        acondicionamentos = pd.json_normalize(acondicionamentos["acondicionamentos"])
-        acondicionamentos["codigo_anvisa_medicamento"] = codigos_anvisa
-        acondicionamentos = acondicionamentos[[k for k in self.ACONDICIONAMENTOS_MAPPER]]
-        acondicionamentos = acondicionamentos.rename(columns=self.ACONDICIONAMENTOS_MAPPER)
-        acondicionamentos = acondicionamentos.apply(lambda row: AcondicionamentoAnvisa(**row), axis=1).tolist()
+        acondicionamentos = acondicionamentos.dropna(subset="acondicionamentos")
+        if not acondicionamentos.empty:
+            acondicionamentos = acondicionamentos.explode("acondicionamentos").reset_index(drop=True)
+            codigos_anvisa = acondicionamentos["codigo_anvisa"].copy()
+            acondicionamentos = pd.json_normalize(acondicionamentos["acondicionamentos"])
+            acondicionamentos["codigo_anvisa_medicamento"] = codigos_anvisa
+            acondicionamentos = acondicionamentos[[k for k in self.ACONDICIONAMENTOS_MAPPER]]
+            acondicionamentos = acondicionamentos.rename(columns=self.ACONDICIONAMENTOS_MAPPER)
+            acondicionamentos = acondicionamentos.apply(lambda row: AcondicionamentoAnvisa(**row), axis=1).tolist()
+        else:
+            acondicionamentos = []
 
         produtos = produtos.drop(columns=["apresentacoes", "acondicionamentos"])
         produtos = produtos.apply(lambda row: ProdutoApresentacaoAnvisa(**row), axis=1).tolist()
