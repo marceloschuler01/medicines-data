@@ -2,6 +2,23 @@ import os
 import psycopg2
 from psycopg2 import OperationalError
 
+
+def with_database_connection(func):
+    def wrapper(*args, **kwargs):
+
+        if 'conn' in kwargs and kwargs['conn'] is not None:
+            result = func(*args, **kwargs)
+            return result
+
+        kwargs['conn'] = PostgresConnection()
+        result = func(*args, **kwargs)
+        kwargs['conn'].commit()
+        if not kwargs['conn'].closed:
+            kwargs['conn'].close()
+        return result
+
+    return wrapper
+
 class PostgresConnection:
     def __init__(self):
         self.db_name = os.getenv("DB_NAME")
@@ -10,6 +27,7 @@ class PostgresConnection:
         self.db_host = os.getenv("DB_HOST")
         self.db_port = os.getenv("DB_PORT", 5432)
         self.conn = None
+        self.connect()
 
     def connect(self):
         try:
@@ -26,6 +44,10 @@ class PostgresConnection:
         except OperationalError as e:
             print(f"❌ Erro na conexão: {e}")
             self.conn = None
+
+    @property
+    def closed(self):
+        return self.conn is None or self.conn.closed != 0
 
     def execute_query(self, query, params=None, fetch=False):
         if self.conn is None:
