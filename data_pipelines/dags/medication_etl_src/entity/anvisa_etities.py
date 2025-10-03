@@ -52,4 +52,4 @@ class ProdutoApresentacaoAnvisa:
     codigo_anvisa: str
     codigo_notificacao_anvisa: str
     classes_terapeuticas: list[str]
-    numero_registro_anvisa: str
+    #numero_registro_anvisa: str

@@ -16,9 +16,9 @@ class AnvisaApresentationsAdapter:
         'codigoProduto': 'codigo_anvisa',
         'codigoNotificacao':'codigo_notificacao_anvisa',
         'classesTerapeuticas': 'classes_terapeuticas',
-        'numeroRegistro': 'numero_registro_anvisa',
-        'apresentacoes': 'apresentacoes',
-        'acondicionamentos': 'acondicionamentos',
+        #'numeroRegistro': 'numero_registro_anvisa',
+        #'apresentacoes': 'apresentacoes',
+        #'acondicionamentos': 'acondicionamentos',
     }
 
     APRESENTACOES_MAPPER = {
@@ -44,6 +44,19 @@ class AnvisaApresentationsAdapter:
         'volume': 'volume',
         'principiosAtivos': 'principios_ativos',
     }
+
+    def extract_medicine_info(self, apresentacoes: list[dict]) -> list[ProdutoApresentacaoAnvisa]:
+
+        apresentacoes = pd.DataFrame(apresentacoes)
+
+        apresentacoes = apresentacoes[[k for k in self.PRODUTO_MAPPER]]
+        apresentacoes = apresentacoes.rename(columns=self.PRODUTO_MAPPER)
+
+        produtos = apresentacoes.copy()
+
+        produtos = produtos.apply(lambda row: ProdutoApresentacaoAnvisa(**row), axis=1).tolist()
+
+        return produtos
 
     def adapt(self, apresentacoes: list[dict]):
 
