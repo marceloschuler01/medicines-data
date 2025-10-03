@@ -11,7 +11,13 @@ def with_database_connection(func):
             return result
 
         kwargs['conn'] = PostgresConnection()
-        result = func(*args, **kwargs)
+        try:
+            result = func(*args, **kwargs)
+        except Exception as e:
+            if not kwargs['conn'].closed:
+                kwargs['conn'].rollback()
+            print(f"❌ Erro na transação: {e}")
+            raise e
         kwargs['conn'].commit()
         if not kwargs['conn'].closed:
             kwargs['conn'].close()
@@ -62,7 +68,7 @@ class PostgresConnection:
                 return True
         except Exception as e:
             print(f"❌ Erro ao executar query: {e}")
-            return None
+            raise e
 
     def commit(self):
         if self.conn:
@@ -78,3 +84,18 @@ class PostgresConnection:
         if self.conn:
             self.conn.close()
             print("🔒 Conexão encerrada.")
+
+    def copy_expert(self, query: str, file, fetch=False):
+        if self.conn is None:
+            print("⚠️ Não há conexão ativa.")
+            return None
+
+        try:
+            with self.conn.cursor() as cur:
+                cur.copy_expert(query, file)
+                if fetch:
+                    return cur.fetchall()
+                return True
+        except Exception as e:
+            print(f"❌ Erro ao executar query: {e}")
+            raise e
