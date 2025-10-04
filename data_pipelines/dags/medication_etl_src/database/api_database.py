@@ -12,13 +12,22 @@ db_config = {
     'port': os.getenv('DB_PORT')  # Default PostgreSQL port
 }
 
+class Filter:
+
+    def __init__(self, column: str, value: str, operator: str = '='):
+        self.column = column
+        self.value = value
+        self.operator = operator
 
 class ApiDatabase:
-    def __init__(self, db_connector: PostgresConnection=None):
-        self.db_connector = db_connector or PostgresConnection()
 
+    @staticmethod
+    def filter(column: str, value: str, operator: str = '=') -> Filter:
+        return Filter(column=column, value=value, operator=operator)
+
+    @staticmethod
     @with_database_connection
-    def get_columns(self, table_name: str, conn: PostgresConnection=None) -> list[str]:
+    def get_columns(table_name: str, conn: PostgresConnection=None) -> list[str]:
 
         query = f"""
             SELECT column_name
@@ -28,8 +37,9 @@ class ApiDatabase:
         result = conn.execute_query(query, fetch=True)
         return [row[0] for row in result]
 
+    @staticmethod
     @with_database_connection
-    def insert_with_copy(self, table_name: str, data: list[dict], conn: PostgresConnection=None):
+    def insert_with_copy(table_name: str, data: list[dict], conn: PostgresConnection=None):
 
         sep = ","
         null_value = "NULL"
@@ -37,7 +47,7 @@ class ApiDatabase:
 
         df = pd.DataFrame(data)
 
-        table_columns = self.get_columns(table_name=table_name, conn=conn)
+        table_columns = ApiDatabase.get_columns(table_name=table_name, conn=conn)
         df = df.filter(items=table_columns, axis="columns")
         columns = ', '.join(df.columns)
 
@@ -49,18 +59,59 @@ class ApiDatabase:
         query = f""" COPY {table_name} ({columns}) FROM STDIN WITH (FORMAT CSV, DELIMITER '{sep}', NULL '{null_value}', QUOTE '{quote}'); """
         conn.copy_expert(query=query, file=buffer)
 
+    @staticmethod
     @with_database_connection
-    def select(self, table_name: str, columns: list[str]=None, conn: PostgresConnection=None) -> list[tuple]:
+    def select(table_name: str, columns: list[str]=None, filters: list[Filter]=None, conn: PostgresConnection=None) -> list[tuple]:
 
-        query = f"SELECT {','.join(columns) if columns else '*'} FROM {table_name};"
-        result = conn.execute_query(query, fetch=True)
+        params = {}
+        sql_filters = ApiDatabase._parse_filters(filters=filters, params=params)
+
+        query = f"SELECT {','.join(columns) if columns else '*'} FROM {table_name} {sql_filters};"
+        result = conn.execute_query(query, params=params, fetch=True)
 
         return result
 
+    @staticmethod
     @with_database_connection
-    def select_with_pandas(self, table_name: str, columns: list[str]=None, conn: PostgresConnection=None) -> pd.DataFrame:
+    def select_with_pandas(table_name: str, columns: list[str]=None, filters: list[Filter] = None, conn: PostgresConnection=None) -> pd.DataFrame:
 
-        query = f"SELECT {', '.join(columns) if columns else '*'} FROM {table_name};"
+        params = {}
+        sql_filters = ApiDatabase._parse_filters(filters=filters, params=params)
+
+        query = f"SELECT {','.join(columns) if columns else '*'} FROM {table_name} {sql_filters};"
         result = pd.read_sql_query(query, conn.conn)
 
         return result
+
+    @staticmethod
+    def _parse_filters(filters: list[Filter], params: dict) -> str:
+
+        if not filters:
+            return ""
+
+        filter_clauses = []
+
+        for i, filter in enumerate(filters):
+
+            value = filter.value
+
+            if filter.value is None and filter.operator == '=':
+                clause = f"{filter.column} IS NULL"
+                filter_clauses.append(clause)
+                continue
+
+            if filter.value is None and filter.operator == '!=':
+                clause = f"{filter.column} IS NOT NULL"
+                filter_clauses.append(clause)
+                continue
+
+            if filter.operator.upper() == 'IN':
+                if not isinstance(value, (list, tuple, set)):
+                    raise ValueError(f"Value for 'IN' operator must be a list, tuple or set. Got {type(value)}")
+                value = tuple(value)
+
+            params[f"filter_value_{i}"] = value
+            clause = f"{filter.column}   {filter.operator}   %({f'filter_value_{i}'})s"
+            filter_clauses.append(clause)
+
+        return " WHERE " + " AND ".join(filter_clauses)
