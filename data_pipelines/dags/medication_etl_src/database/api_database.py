@@ -85,6 +85,11 @@ class ApiDatabase:
         return result
 
     @staticmethod
+    @with_database_connection
+    def execute(query: str, params: dict | None = None, conn: PostgresConnection=None) -> None:
+        conn.execute_query(query, params=params, fetch=False)
+
+    @staticmethod
     def _parse_filters(filters: list[Filter] | Filter, params: dict) -> str:
 
         if isinstance(filters, Filter):

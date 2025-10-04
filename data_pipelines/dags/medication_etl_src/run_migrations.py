@@ -1,51 +1,44 @@
 import os
-import psycopg2
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
-
-# Database connection settings
-db_config = {
-    'dbname': os.getenv('DB_NAME'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'host': os.getenv('DB_HOST'),  # Change if using a remote server
-    'port': os.getenv('DB_PORT')  # Default PostgreSQL port
-}
+import sys
+from medication_etl_src.database.api_database import ApiDatabase as sql
+from medication_etl_src.database.db_connector import with_database_connection
 
 # Path to the migrations folder
-migrations_folder = './migrations'
+migrations_folder = './medication_etl_src/migrations'
 
-# Function to execute SQL migration files
-def run_migrations():
-    # Establish a connection to the database
+@with_database_connection
+def run_migrations(conn=None, migration_name=None):
+    """
+    Run all migrations or a specific one if migration_name is provided.
+    """
     try:
-        conn = psycopg2.connect(**db_config)
-        cursor = conn.cursor()
+        # Get all .sql files in sorted order
+        migration_files = sorted(
+            [f for f in os.listdir(migrations_folder) if f.endswith('.sql')]
+        )
 
-        # Loop through all the SQL migration files in the folder
-        for filename in sorted(os.listdir(migrations_folder)):
-            if filename.endswith('.sql'):
-                file_path = os.path.join(migrations_folder, filename)
+        # If a specific migration is provided, filter to only that one
+        if migration_name:
+            if migration_name not in migration_files:
+                print(f"Migration '{migration_name}' not found in {migrations_folder}")
+                return
+            migration_files = [migration_name]
 
-                # Read the contents of the migration file
-                with open(file_path, 'r') as file:
-                    sql_query = file.read()
+        for filename in migration_files:
+            file_path = os.path.join(migrations_folder, filename)
+            with open(file_path, 'r') as file:
+                sql_query = file.read()
 
-                # Execute the SQL query
-                print(f"Running migration: {filename}")
-                cursor.execute(sql_query)
-                conn.commit()  # Commit changes to the database
+            print(f"Running migration: {filename}")
+            sql.execute(sql_query, conn=conn)
 
-        # Close the cursor and connection
-        cursor.close()
-        conn.close()
-        print("All migrations have been applied successfully!")
+        print("Selected migrations have been applied successfully!")
 
     except Exception as e:
         print(f"Error running migrations: {e}")
 
-# Run the migrations
+
 if __name__ == '__main__':
-    run_migrations()
+    # Allow passing the migration name as a command-line argument
+    migration_to_run = sys.argv[1] if len(sys.argv) > 1 else None
+    run_migrations(migration_name=migration_to_run)
