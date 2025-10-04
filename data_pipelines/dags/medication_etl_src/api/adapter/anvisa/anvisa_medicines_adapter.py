@@ -1,12 +1,12 @@
 import pandas as pd
-from medication_etl_src.entity.anvisa_etities import MedicineAnvisa
+from medication_etl_src.entity.anvisa_entities import MedicineAnvisa
 
 class AnvisaMedicinesAdapter:
 
     COLUMN_MAPPER = {
         'codigo': 'codigo_anvisa',
         'codigoNotificacao':'codigo_notificacao_anvisa',
-        'nome': 'nome_produto',
+        'nome': 'nome_comercial',
         'numeroRegistro': 'numero_registro_anvisa',
         'numero': 'numero_processo_anvisa',
         'tipoAutorizacao': 'tipo_autorizacao_anvisa',

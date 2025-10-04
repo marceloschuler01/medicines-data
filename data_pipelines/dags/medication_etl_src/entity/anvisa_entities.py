@@ -7,7 +7,7 @@ class MedicineAnvisa:
 
     codigo_anvisa: str
     codigo_notificacao_anvisa: str
-    nome_produto: str
+    nome_comercial: str
     numero_registro_anvisa: str
     numero_processo_anvisa: str
     tipo_autorizacao_anvisa: str
