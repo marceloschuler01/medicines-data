@@ -1,6 +1,6 @@
 import pandas as pd
 from dataclasses import dataclass
-from medication_etl_src.entity.anvisa_etities import ProdutoApresentacaoAnvisa, ApresentacaoAnvisa, AcondicionamentoAnvisa
+from medication_etl_src.entity.anvisa_entities import ProdutoApresentacaoAnvisa, ApresentacaoAnvisa, AcondicionamentoAnvisa
 
 
 @dataclass
@@ -17,12 +17,13 @@ class AnvisaApresentationsAdapter:
         'codigoNotificacao':'codigo_notificacao_anvisa',
         'classesTerapeuticas': 'classes_terapeuticas',
         #'numeroRegistro': 'numero_registro_anvisa',
-        #'apresentacoes': 'apresentacoes',
-        #'acondicionamentos': 'acondicionamentos',
+        'apresentacoes': 'apresentacoes',
+        'acondicionamentos': 'acondicionamentos',
     }
 
     APRESENTACOES_MAPPER = {
         'codigo': 'codigo_anvisa',
+        'codigo_anvisa_medicamento': 'codigo_anvisa_medicamento',
         'apresentacao': 'apresentacao',
         'principiosAtivos': 'principios_ativos',
         'formasFarmaceuticas': 'formas_farmaceuticas',
@@ -39,6 +40,7 @@ class AnvisaApresentationsAdapter:
 
     
     ACONDICIONAMENTOS_MAPPER = {
+        "codigo_notificacao_anvisa_medicamento" : "codigo_notificacao_anvisa_medicamento",
         'codigo': 'codigo_anvisa',
         'apresentacao': 'apresentacao',
         'volume': 'volume',
@@ -80,13 +82,13 @@ class AnvisaApresentationsAdapter:
         else:
             apresentacoes = []
 
-        acondicionamentos = produtos[["codigo_anvisa", "acondicionamentos"]]
-        acondicionamentos = acondicionamentos.dropna(subset="acondicionamentos")
+        acondicionamentos = produtos[["codigo_notificacao_anvisa", "acondicionamentos"]]
+        acondicionamentos = acondicionamentos[acondicionamentos["acondicionamentos"].apply(lambda x: isinstance(x, list) and len(x) > 0)]
         if not acondicionamentos.empty:
             acondicionamentos = acondicionamentos.explode("acondicionamentos").reset_index(drop=True)
-            codigos_anvisa = acondicionamentos["codigo_anvisa"].copy()
+            codigos_anvisa = acondicionamentos["codigo_notificacao_anvisa"].copy()
             acondicionamentos = pd.json_normalize(acondicionamentos["acondicionamentos"])
-            acondicionamentos["codigo_anvisa_medicamento"] = codigos_anvisa
+            acondicionamentos["codigo_notificacao_anvisa_medicamento"] = codigos_anvisa
             acondicionamentos = acondicionamentos[[k for k in self.ACONDICIONAMENTOS_MAPPER]]
             acondicionamentos = acondicionamentos.rename(columns=self.ACONDICIONAMENTOS_MAPPER)
             acondicionamentos = acondicionamentos.apply(lambda row: AcondicionamentoAnvisa(**row), axis=1).tolist()

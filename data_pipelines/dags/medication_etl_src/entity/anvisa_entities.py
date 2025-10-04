@@ -24,6 +24,7 @@ class MedicineAnvisa:
 class ApresentacaoAnvisa:
 
     codigo_anvisa: str
+    codigo_anvisa_medicamento: str
     apresentacao: str
     principios_ativos: list[str]
     formas_farmaceuticas: list[str]
@@ -41,6 +42,7 @@ class ApresentacaoAnvisa:
 @dataclass
 class AcondicionamentoAnvisa:
     codigo_anvisa: str
+    codigo_notificacao_anvisa_medicamento: str
     apresentacao: str
     volume: str
     principios_ativos: list[str]

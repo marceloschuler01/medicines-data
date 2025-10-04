@@ -31,7 +31,11 @@ class PostgresConnection:
         self.db_user = os.getenv("DB_USER")
         self.db_password = os.getenv("DB_PASSWORD")
         self.db_host = os.getenv("DB_HOST")
-        self.db_port = os.getenv("DB_PORT", 5432)
+        self.db_port = os.getenv("DB_PORT")
+
+        if not all([self.db_name, self.db_user, self.db_password, self.db_host, self.db_port]):
+            raise ValueError("❌ Configurações do banco de dados incompletas. Por favor verifique as variáveis de ambiente.")
+
         self.conn = None
         self.connect()
 

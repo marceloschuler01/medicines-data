@@ -50,8 +50,17 @@ class ApiDatabase:
         conn.copy_expert(query=query, file=buffer)
 
     @with_database_connection
-    def select(self, table_name: str, conn: PostgresConnection=None) -> list[tuple]:
+    def select(self, table_name: str, columns: list[str]=None, conn: PostgresConnection=None) -> list[tuple]:
 
-        query = f"SELECT * FROM {table_name};"
+        query = f"SELECT {','.join(columns) if columns else '*'} FROM {table_name};"
         result = conn.execute_query(query, fetch=True)
+
+        return result
+
+    @with_database_connection
+    def select_with_pandas(self, table_name: str, columns: list[str]=None, conn: PostgresConnection=None) -> pd.DataFrame:
+
+        query = f"SELECT {', '.join(columns) if columns else '*'} FROM {table_name};"
+        result = pd.read_sql_query(query, conn.conn)
+
         return result
