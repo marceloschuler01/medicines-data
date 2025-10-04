@@ -2,11 +2,11 @@ import pandas as pd
 import uuid
 from dataclasses import asdict, dataclass
 
-from medication_etl_src.database.api_database import ApiDatabase
+from medication_etl_src.database.api_database import ApiDatabase as sql
 from medication_etl_src.database.db_connector import with_database_connection
 from medication_etl_src.staging_db.staging_db import StagingDB
 from medication_etl_src.api.adapter.anvisa.anvisa_medicines_adapter import AnvisaMedicinesAdapter
-from medication_etl_src.entity.anvisa_etities import MedicineAnvisa
+from medication_etl_src.entity.anvisa_entities import MedicineAnvisa
 
 
 @dataclass
@@ -59,7 +59,7 @@ class ExtractTransformAndLoadFromStagingDBToMedicinesDB:
         medicamentos = medicamentos + medicamentos_inativos
 
         return medicamentos
-    
+
     def _extract_regulatory_categories(self, regulatory_categories: list[dict]) -> pd.DataFrame:
 
         regulatory_categories = [regulatory_category for regulatory_category in regulatory_categories if pd.notnull(regulatory_category) and regulatory_category]
@@ -108,21 +108,21 @@ class LoadMedicinesToDB:
     @with_database_connection
     def main(self, df_medicines: pd.DataFrame, conn=None):
 
-        ApiDatabase().insert_with_copy(table_name="medicamento", data=df_medicines.to_dict(orient="records"), conn=conn)
+        sql.insert_with_copy(table_name="medicamento", data=df_medicines.to_dict(orient="records"), conn=conn)
 
 class LoadRegularoryCategoriesToDB:
 
     @with_database_connection
     def main(self, categories: pd.DataFrame, conn=None):
 
-        ApiDatabase().insert_with_copy(table_name="categoria_regulatoria", data=categories.to_dict(orient="records"), conn=conn)
+        sql.insert_with_copy(table_name="categoria_regulatoria", data=categories.to_dict(orient="records"), conn=conn)
 
 class LoadEnterprisesToDB:
 
     @with_database_connection
     def main(self, enterprises: pd.DataFrame, conn=None):
 
-        ApiDatabase().insert_with_copy(table_name="empresa", data=enterprises.to_dict(orient="records"), conn=conn)
+        sql.insert_with_copy(table_name="empresa", data=enterprises.to_dict(orient="records"), conn=conn)
 
 
 

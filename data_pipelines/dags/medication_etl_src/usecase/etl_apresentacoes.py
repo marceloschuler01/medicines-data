@@ -2,7 +2,7 @@ import pandas as pd
 import uuid
 from dataclasses import asdict, dataclass
 
-from medication_etl_src.database.api_database import ApiDatabase
+from medication_etl_src.database.api_database import ApiDatabase as sql
 from medication_etl_src.database.db_connector import with_database_connection
 from medication_etl_src.staging_db.staging_db import StagingDB
 from medication_etl_src.api.adapter.anvisa.anvisa_apresentations_adapter import AnvisaApresentationsAdapter
@@ -48,6 +48,8 @@ class ExtractTransformAndLoadApresentacoes:
 
         df_active_ingredients = self._add_missing_active_ingredients_and_return_all_active_ingredients(presentations=presentations)
 
+        df_medicnes = self._get_medicines_from_presentations(presentations=presentations)
+
 
     def _add_missing_active_ingredients_and_return_all_active_ingredients(self, presentations: pd.DataFrame) -> pd.DataFrame:
 
@@ -55,13 +57,13 @@ class ExtractTransformAndLoadApresentacoes:
 
         df_active_ingredients = pd.DataFrame(active_ingredients, columns=["nome"])
 
-        active_ingredients_database = ApiDatabase().select_with_pandas("principio_ativo", columns=["id_principio_ativo", "nome"])
+        active_ingredients_database = sql.select_with_pandas("principio_ativo", columns=["id_principio_ativo", "nome"])
 
         missing_active_ingredients = df_active_ingredients[~df_active_ingredients["nome"].isin(active_ingredients_database["nome"])]
         missing_active_ingredients["id_principio_ativo"] = [self._generate_uuid() for _ in range(len(missing_active_ingredients))]
 
         if not missing_active_ingredients.empty:
-            ApiDatabase().insert_with_copy(table_name="principio_ativo", data=missing_active_ingredients.to_dict(orient="records"))
+            sql.insert_with_copy(table_name="principio_ativo", data=missing_active_ingredients.to_dict(orient="records"))
 
         df_active_ingredients = pd.concat([active_ingredients_database, missing_active_ingredients], ignore_index=True)
 
@@ -69,6 +71,11 @@ class ExtractTransformAndLoadApresentacoes:
         df_active_ingredients = df_active_ingredients[df_active_ingredients["nome"].isin(active_ingredients)]
 
         return df_active_ingredients
+
+    def _get_medicines_from_presentations(self, presentations: pd.DataFrame) -> pd.DataFrame:
+
+        medicines = sql.select_with_pandas("medicamento", columns=["id_medicamento", "codigo_anvisa"])
+        return medicines
 
     def _extract_regulatory_categories(self, regulatory_categories: list[dict]) -> pd.DataFrame:
 
@@ -118,7 +125,7 @@ class LoadMedicinesToDB:
     @with_database_connection
     def main(self, df_medicines: pd.DataFrame, conn=None):
 
-        ApiDatabase().insert_with_copy(table_name="medicamento", data=df_medicines.to_dict(orient="records"), conn=conn)
+        sql.insert_with_copy(table_name="medicamento", data=df_medicines.to_dict(orient="records"), conn=conn)
 
 
 
