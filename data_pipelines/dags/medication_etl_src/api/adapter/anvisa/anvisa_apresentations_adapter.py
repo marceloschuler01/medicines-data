@@ -78,6 +78,7 @@ class AnvisaApresentationsAdapter:
             apresentacoes["codigo_anvisa_medicamento"] = codigos_anvisa
             apresentacoes = apresentacoes[[k for k in self.APRESENTACOES_MAPPER]]
             apresentacoes = apresentacoes.rename(columns=self.APRESENTACOES_MAPPER)
+            apresentacoes["via_administracao"] = apresentacoes["via_administracao"].apply(lambda x: x[0] if isinstance(x, list) and len(x) > 0 else None)
             apresentacoes = apresentacoes.apply(lambda row: ApresentacaoAnvisa(**row), axis=1).tolist()
         else:
             apresentacoes = []

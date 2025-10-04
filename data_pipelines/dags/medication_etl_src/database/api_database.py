@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from io import StringIO
+from typing import Any
 
 from medication_etl_src.database.db_connector import PostgresConnection, with_database_connection
 
@@ -22,7 +23,7 @@ class Filter:
 class ApiDatabase:
 
     @staticmethod
-    def filter(column: str, value: str, operator: str = '=') -> Filter:
+    def filter(column: str, value: Any, operator: str = '=') -> Filter:
         return Filter(column=column, value=value, operator=operator)
 
     @staticmethod
@@ -61,7 +62,7 @@ class ApiDatabase:
 
     @staticmethod
     @with_database_connection
-    def select(table_name: str, columns: list[str]=None, filters: list[Filter]=None, conn: PostgresConnection=None) -> list[tuple]:
+    def select(table_name: str, columns: list[str]=None, filters: list[Filter] | Filter | None = None, conn: PostgresConnection=None) -> list[tuple]:
 
         params = {}
         sql_filters = ApiDatabase._parse_filters(filters=filters, params=params)
@@ -73,18 +74,21 @@ class ApiDatabase:
 
     @staticmethod
     @with_database_connection
-    def select_with_pandas(table_name: str, columns: list[str]=None, filters: list[Filter] = None, conn: PostgresConnection=None) -> pd.DataFrame:
+    def select_with_pandas(table_name: str, columns: list[str]=None, filters: list[Filter] | Filter | None = None, conn: PostgresConnection=None) -> pd.DataFrame:
 
         params = {}
         sql_filters = ApiDatabase._parse_filters(filters=filters, params=params)
 
         query = f"SELECT {','.join(columns) if columns else '*'} FROM {table_name} {sql_filters};"
-        result = pd.read_sql_query(query, conn.conn)
+        result = pd.read_sql_query(query, params=params, con=conn.conn)
 
         return result
 
     @staticmethod
-    def _parse_filters(filters: list[Filter], params: dict) -> str:
+    def _parse_filters(filters: list[Filter] | Filter, params: dict) -> str:
+
+        if isinstance(filters, Filter):
+            filters = [filters]
 
         if not filters:
             return ""
@@ -105,13 +109,17 @@ class ApiDatabase:
                 filter_clauses.append(clause)
                 continue
 
-            if filter.operator.upper() == 'IN':
+            if filter.operator.upper() in ['IN', 'NOT IN']:
                 if not isinstance(value, (list, tuple, set)):
                     raise ValueError(f"Value for 'IN' operator must be a list, tuple or set. Got {type(value)}")
+                if len(value) == 0:
+                    # não há nada para filtrar → força expressão falsa
+                    filter_clauses.append("1=0")
+                    continue
                 value = tuple(value)
 
             params[f"filter_value_{i}"] = value
-            clause = f"{filter.column}   {filter.operator}   %({f'filter_value_{i}'})s"
+            clause = f"{filter.column}   {filter.operator}  %({f'filter_value_{i}'})s"
             filter_clauses.append(clause)
 
         return " WHERE " + " AND ".join(filter_clauses)

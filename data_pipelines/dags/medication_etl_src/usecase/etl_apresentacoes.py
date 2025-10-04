@@ -34,9 +34,11 @@ class ExtractTransformAndLoadApresentacoes:
         df_presentations = pd.DataFrame([asdict(item) for item in parsed_data.apresentacoes])
         del parsed_data.apresentacoes
 
-        df_presentations["id"] = [self._generate_uuid() for _ in range(len(df_presentations))]
+        df_presentations["id_apresentacao_medicamento"] = [self._generate_uuid() for _ in range(len(df_presentations))]
 
-        self._extract_other_entities_data_from_presentations(presentations=df_presentations)
+        df_presentations = self._extract_other_entities_data_from_presentations(presentations=df_presentations)
+
+        LoadPresentationsToDB().main(df_presentations=df_presentations, conn=conn)
 
     def _read_from_staging_db(self, page: int) -> list[dict]:
 
@@ -48,8 +50,17 @@ class ExtractTransformAndLoadApresentacoes:
 
         df_active_ingredients = self._add_missing_active_ingredients_and_return_all_active_ingredients(presentations=presentations)
 
-        df_medicnes = self._get_medicines_from_presentations(presentations=presentations)
+        presentations["codigo_anvisa_medicamento"] = presentations["codigo_anvisa_medicamento"].astype(str)
 
+        medicines_codigo_anvisa_to_id_mapper = self._get_medicines_from_presentations_id_mapper(presentations=presentations)
+
+        presentations["id_medicamento"] = presentations["codigo_anvisa_medicamento"].map(medicines_codigo_anvisa_to_id_mapper)
+
+        # TODO, DO NOT DROP
+        presentations.drop(columns=["volume_total_em_ml", "fabricantes_nacionais", "fabricantesInternacionais"], inplace=True)
+        presentations["volume_total_em_ml"] = 0.10
+
+        return presentations
 
     def _add_missing_active_ingredients_and_return_all_active_ingredients(self, presentations: pd.DataFrame) -> pd.DataFrame:
 
@@ -72,10 +83,13 @@ class ExtractTransformAndLoadApresentacoes:
 
         return df_active_ingredients
 
-    def _get_medicines_from_presentations(self, presentations: pd.DataFrame) -> pd.DataFrame:
+    def _get_medicines_from_presentations_id_mapper(self, presentations: pd.DataFrame) -> dict[str, str]:
 
-        medicines = sql.select_with_pandas("medicamento", columns=["id_medicamento", "codigo_anvisa"])
-        return medicines
+        codigos_medicamento = presentations["codigo_anvisa_medicamento"].dropna().unique().tolist()
+
+        medicines = sql.select_with_pandas("medicamento", filters=sql.filter("codigo_anvisa", codigos_medicamento, "IN"), columns=["id_medicamento", "codigo_anvisa"])
+
+        return medicines.set_index("codigo_anvisa")["id_medicamento"].to_dict()
 
     def _extract_regulatory_categories(self, regulatory_categories: list[dict]) -> pd.DataFrame:
 
@@ -120,13 +134,12 @@ class ExtractTransformAndLoadApresentacoes:
         return str(uuid.uuid4())
 
 
-class LoadMedicinesToDB:
+class LoadPresentationsToDB:
 
     @with_database_connection
-    def main(self, df_medicines: pd.DataFrame, conn=None):
+    def main(self, df_presentations: pd.DataFrame, conn=None):
 
-        sql.insert_with_copy(table_name="medicamento", data=df_medicines.to_dict(orient="records"), conn=conn)
-
+        sql.insert_with_copy(table_name="apresentacao_medicamento", data=df_presentations.to_dict(orient="records"), conn=conn)
 
 
 if __name__ == "__main__":
