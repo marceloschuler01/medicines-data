@@ -71,6 +71,7 @@ class AnvisaApresentationsAdapter:
         
         apresentacoes = produtos[["codigo_anvisa", "apresentacoes"]]
         apresentacoes = apresentacoes.dropna(subset="apresentacoes")
+        apresentacoes = apresentacoes[apresentacoes["apresentacoes"].apply(lambda x: isinstance(x, list) and len(x) > 0)]
         if not apresentacoes.empty:
             apresentacoes = apresentacoes.explode("apresentacoes").reset_index(drop=True)
             codigos_anvisa = apresentacoes["codigo_anvisa"].copy()

@@ -99,6 +99,9 @@ class CompositionParser:
         pres = cls._normalize_text(presentation)
         head = cls._strip_packaging_tail(pres)
 
+        if None in active_ingredients:
+            active_ingredients = [pa for pa in active_ingredients if pa is not None]
+
         # Preserva a grafia original dos ativos (para comparação com os testes),
         # mas remove duplicatas exatas.
         actives = cls._dedup_exact(active_ingredients)

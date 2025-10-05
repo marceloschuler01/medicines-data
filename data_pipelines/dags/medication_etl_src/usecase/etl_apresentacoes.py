@@ -24,9 +24,18 @@ class ExtractTransformAndLoadApresentacoes:
 
     def main(self) -> None:
 
-        apresentacoes = self._read_from_staging_db(page=1)
+        page = 1
 
-        self._extract_transform_and_load(apresentacoes=apresentacoes)
+        while True:
+
+            apresentacoes = self._read_from_staging_db(page=page)
+            if not apresentacoes:
+                break
+
+            print("Processing page:", page, "with", len(apresentacoes), "presentations")
+            self._extract_transform_and_load(apresentacoes=apresentacoes)
+
+            page += 1
 
     @with_database_connection
     def _extract_transform_and_load(self, apresentacoes: list[dict], conn=None):
@@ -36,20 +45,22 @@ class ExtractTransformAndLoadApresentacoes:
         df_presentations = pd.DataFrame([asdict(item) for item in parsed_data.apresentacoes])
         del parsed_data.apresentacoes
 
-        df_presentations["id_apresentacao_medicamento"] = [self._generate_uuid() for _ in range(len(df_presentations))]
+        if not df_presentations.empty:
 
-        df_presentations["codigo_anvisa_medicamento"] = df_presentations["codigo_anvisa_medicamento"].astype(str)
+            df_presentations["id_apresentacao_medicamento"] = [self._generate_uuid() for _ in range(len(df_presentations))]
 
-        medicines_codigo_anvisa_to_id_mapper = self._get_medicines_from_presentations_id_mapper(presentations=df_presentations, conn=conn)
+            df_presentations["codigo_anvisa_medicamento"] = df_presentations["codigo_anvisa_medicamento"].astype(str)
 
-        df_presentations["id_medicamento"] = df_presentations["codigo_anvisa_medicamento"].map(medicines_codigo_anvisa_to_id_mapper)
+            medicines_codigo_anvisa_to_id_mapper = self._get_medicines_from_presentations_id_mapper(presentations=df_presentations, conn=conn)
 
-        # TODO, DO NOT DROP
-        df_presentations.drop(columns=["fabricantes_nacionais", "fabricantesInternacionais"], inplace=True)
+            df_presentations["id_medicamento"] = df_presentations["codigo_anvisa_medicamento"].map(medicines_codigo_anvisa_to_id_mapper)
 
-        LoadPresentationsToDB().main(df_presentations=df_presentations, conn=conn)
+            # TODO, DO NOT DROP
+            df_presentations.drop(columns=["fabricantes_nacionais", "fabricantesInternacionais"], inplace=True)
 
-        df_presentations = self._extract_other_entities_data_from_presentations(presentations=df_presentations, conn=conn)
+            LoadPresentationsToDB().main(df_presentations=df_presentations, conn=conn)
+
+            df_presentations = self._extract_other_entities_data_from_presentations(presentations=df_presentations, conn=conn)
 
     def _read_from_staging_db(self, page: int) -> list[dict]:
 

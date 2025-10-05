@@ -308,3 +308,12 @@ class TestExtractCompositionInfoFromPresentationString(TestCase):
         result = extract_composition_from_presentation_string(presentation, active_ingredients, "6")
         self.assertCountEqual(expected_result, result)
 
+    def test_extract_composition_info_from_presentation_6(self):
+
+        presentation = "200 MG COM LIB CONT CT BL AL PLAS INC X 20"
+        active_ingredients = [None]
+
+        expected_result = []
+
+        result = extract_composition_from_presentation_string(presentation, active_ingredients, "6")
+        self.assertCountEqual(expected_result, result)
