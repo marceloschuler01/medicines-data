@@ -49,6 +49,10 @@ class ApiDatabase:
         df = pd.DataFrame(data)
 
         table_columns = ApiDatabase.get_columns(table_name=table_name, conn=conn)
+
+        if not table_columns:
+            raise ValueError(f"Table '{table_name}' does not exist or has no columns.")
+
         df = df.filter(items=table_columns, axis="columns")
         columns = ', '.join(df.columns)
 
@@ -83,6 +87,16 @@ class ApiDatabase:
         result = pd.read_sql_query(query, params=params, con=conn.conn)
 
         return result
+
+    @staticmethod
+    @with_database_connection
+    def delete(table_name: str, filters: list[Filter] | Filter | None = None, conn: PostgresConnection=None) -> None:
+
+        params = {}
+        sql_filters = ApiDatabase._parse_filters(filters=filters, params=params)
+
+        query = f"DELETE FROM {table_name} {sql_filters};"
+        conn.execute_query(query, params=params, fetch=False)
 
     @staticmethod
     @with_database_connection

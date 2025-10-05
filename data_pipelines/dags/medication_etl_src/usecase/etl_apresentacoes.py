@@ -6,6 +6,8 @@ from medication_etl_src.database.api_database import ApiDatabase as sql
 from medication_etl_src.database.db_connector import with_database_connection
 from medication_etl_src.staging_db.staging_db import StagingDB
 from medication_etl_src.api.adapter.anvisa.anvisa_apresentations_adapter import AnvisaApresentationsAdapter
+from medication_etl_src.utils import extract_composition_from_presentation_string
+from medication_etl_src.utils.extract_composition_from_presentation_string import ItemComposicao
 
 
 @dataclass
@@ -36,9 +38,19 @@ class ExtractTransformAndLoadApresentacoes:
 
         df_presentations["id_apresentacao_medicamento"] = [self._generate_uuid() for _ in range(len(df_presentations))]
 
-        df_presentations = self._extract_other_entities_data_from_presentations(presentations=df_presentations)
+        df_presentations["codigo_anvisa_medicamento"] = df_presentations["codigo_anvisa_medicamento"].astype(str)
+
+        medicines_codigo_anvisa_to_id_mapper = self._get_medicines_from_presentations_id_mapper(presentations=df_presentations, conn=conn)
+
+        df_presentations["id_medicamento"] = df_presentations["codigo_anvisa_medicamento"].map(medicines_codigo_anvisa_to_id_mapper)
+
+        # TODO, DO NOT DROP
+        df_presentations.drop(columns=["volume_total_em_ml", "fabricantes_nacionais", "fabricantesInternacionais"], inplace=True)
+        df_presentations["volume_total_em_ml"] = 0.10
 
         LoadPresentationsToDB().main(df_presentations=df_presentations, conn=conn)
+
+        df_presentations = self._extract_other_entities_data_from_presentations(presentations=df_presentations, conn=conn)
 
     def _read_from_staging_db(self, page: int) -> list[dict]:
 
@@ -46,35 +58,28 @@ class ExtractTransformAndLoadApresentacoes:
 
         return presentations
 
-    def _extract_other_entities_data_from_presentations(self, presentations: pd.DataFrame):
+    @with_database_connection
+    def _extract_other_entities_data_from_presentations(self, presentations: pd.DataFrame, conn=None):
 
-        df_active_ingredients = self._add_missing_active_ingredients_and_return_all_active_ingredients(presentations=presentations)
-
-        presentations["codigo_anvisa_medicamento"] = presentations["codigo_anvisa_medicamento"].astype(str)
-
-        medicines_codigo_anvisa_to_id_mapper = self._get_medicines_from_presentations_id_mapper(presentations=presentations)
-
-        presentations["id_medicamento"] = presentations["codigo_anvisa_medicamento"].map(medicines_codigo_anvisa_to_id_mapper)
-
-        # TODO, DO NOT DROP
-        presentations.drop(columns=["volume_total_em_ml", "fabricantes_nacionais", "fabricantesInternacionais"], inplace=True)
-        presentations["volume_total_em_ml"] = 0.10
+        df_active_ingredients = self._add_missing_active_ingredients_and_return_all_active_ingredients(presentations=presentations, conn=conn)
+        self._extract_compositions_and_load_to_database(presentations=presentations, active_medicines=df_active_ingredients, conn=conn)
 
         return presentations
 
-    def _add_missing_active_ingredients_and_return_all_active_ingredients(self, presentations: pd.DataFrame) -> pd.DataFrame:
+    @with_database_connection
+    def _add_missing_active_ingredients_and_return_all_active_ingredients(self, presentations: pd.DataFrame, conn=None) -> pd.DataFrame:
 
         active_ingredients = presentations["principios_ativos"].explode().dropna().unique().tolist()
 
         df_active_ingredients = pd.DataFrame(active_ingredients, columns=["nome"])
 
-        active_ingredients_database = sql.select_with_pandas("principio_ativo", columns=["id_principio_ativo", "nome"])
+        active_ingredients_database = sql.select_with_pandas("principio_ativo", columns=["id_principio_ativo", "nome"], conn=conn)
 
         missing_active_ingredients = df_active_ingredients[~df_active_ingredients["nome"].isin(active_ingredients_database["nome"])]
         missing_active_ingredients["id_principio_ativo"] = [self._generate_uuid() for _ in range(len(missing_active_ingredients))]
 
         if not missing_active_ingredients.empty:
-            sql.insert_with_copy(table_name="principio_ativo", data=missing_active_ingredients.to_dict(orient="records"))
+            sql.insert_with_copy(table_name="principio_ativo", data=missing_active_ingredients.to_dict(orient="records"), conn=conn)
 
         df_active_ingredients = pd.concat([active_ingredients_database, missing_active_ingredients], ignore_index=True)
 
@@ -83,11 +88,43 @@ class ExtractTransformAndLoadApresentacoes:
 
         return df_active_ingredients
 
-    def _get_medicines_from_presentations_id_mapper(self, presentations: pd.DataFrame) -> dict[str, str]:
+    @with_database_connection
+    def _extract_compositions_and_load_to_database(self, presentations: pd.DataFrame, active_medicines: pd.DataFrame, conn=None) -> None:
+
+        compositions = self._extract_composition_from_presentations(presentations=presentations, active_medicines=active_medicines)
+
+        #sql.delete(table_name="composicao_apresentacao_medicamento", filters=sql.filter("id_apresentacao_medicamento", presentations["id_apresentacao_medicamento"].tolist(), "IN"))
+
+        # TODO these are compositions that could not be parsed correctly, correct it
+        compositions = compositions.dropna(subset=["dosagem"])
+
+        sql.insert_with_copy(table_name="composicao_apresentacao_medicamento", data=compositions.to_dict(orient="records"), conn=conn)
+
+    def _extract_composition_from_presentations(self, presentations: pd.DataFrame, active_medicines: pd.DataFrame) -> pd.DataFrame:
+
+        presentations = presentations[["id_apresentacao_medicamento", "apresentacao", "principios_ativos"]].copy()
+
+        compositions: list[ItemComposicao] = []
+
+        for row in presentations.itertuples(index=False):
+            extracted_compositions = extract_composition_from_presentation_string(row.apresentacao, row.principios_ativos, row.id_apresentacao_medicamento)
+            compositions.extend(extracted_compositions)
+
+        compositions: list[dict] = [asdict(item) for item in compositions]
+
+        compositions: pd.DataFrame = pd.DataFrame(compositions)
+
+        id_active_ingredient_mapper = active_medicines.set_index("nome")["id_principio_ativo"].to_dict()
+        compositions["id_principio_ativo"] = compositions["principio_ativo"].map(id_active_ingredient_mapper)
+
+        return compositions[["id_apresentacao_medicamento", "id_principio_ativo", "dosagem", "unidade_de_medida"]]
+
+    @with_database_connection
+    def _get_medicines_from_presentations_id_mapper(self, presentations: pd.DataFrame, conn=None) -> dict[str, str]:
 
         codigos_medicamento = presentations["codigo_anvisa_medicamento"].dropna().unique().tolist()
 
-        medicines = sql.select_with_pandas("medicamento", filters=sql.filter("codigo_anvisa", codigos_medicamento, "IN"), columns=["id_medicamento", "codigo_anvisa"])
+        medicines = sql.select_with_pandas("medicamento", filters=sql.filter("codigo_anvisa", codigos_medicamento, "IN"), columns=["id_medicamento", "codigo_anvisa"], conn=conn)
 
         return medicines.set_index("codigo_anvisa")["id_medicamento"].to_dict()
 
