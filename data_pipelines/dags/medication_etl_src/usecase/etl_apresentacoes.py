@@ -45,8 +45,7 @@ class ExtractTransformAndLoadApresentacoes:
         df_presentations["id_medicamento"] = df_presentations["codigo_anvisa_medicamento"].map(medicines_codigo_anvisa_to_id_mapper)
 
         # TODO, DO NOT DROP
-        df_presentations.drop(columns=["volume_total_em_ml", "fabricantes_nacionais", "fabricantesInternacionais"], inplace=True)
-        df_presentations["volume_total_em_ml"] = 0.10
+        df_presentations.drop(columns=["fabricantes_nacionais", "fabricantesInternacionais"], inplace=True)
 
         LoadPresentationsToDB().main(df_presentations=df_presentations, conn=conn)
 
@@ -95,9 +94,6 @@ class ExtractTransformAndLoadApresentacoes:
 
         #sql.delete(table_name="composicao_apresentacao_medicamento", filters=sql.filter("id_apresentacao_medicamento", presentations["id_apresentacao_medicamento"].tolist(), "IN"))
 
-        # TODO these are compositions that could not be parsed correctly, correct it
-        compositions = compositions.dropna(subset=["dosagem"])
-
         sql.insert_with_copy(table_name="composicao_apresentacao_medicamento", data=compositions.to_dict(orient="records"), conn=conn)
 
     def _extract_composition_from_presentations(self, presentations: pd.DataFrame, active_medicines: pd.DataFrame) -> pd.DataFrame:
@@ -127,44 +123,6 @@ class ExtractTransformAndLoadApresentacoes:
         medicines = sql.select_with_pandas("medicamento", filters=sql.filter("codigo_anvisa", codigos_medicamento, "IN"), columns=["id_medicamento", "codigo_anvisa"], conn=conn)
 
         return medicines.set_index("codigo_anvisa")["id_medicamento"].to_dict()
-
-    def _extract_regulatory_categories(self, regulatory_categories: list[dict]) -> pd.DataFrame:
-
-        regulatory_categories = [regulatory_category for regulatory_category in regulatory_categories if pd.notnull(regulatory_category) and regulatory_category]
-
-        df_regulatory_categories = pd.DataFrame(regulatory_categories)
-
-        # TODO: Verify why some categories are coming with 'codigo' as NaN
-        df_regulatory_categories = df_regulatory_categories.dropna(subset=["codigo"])
-
-        df_regulatory_categories = df_regulatory_categories.drop_duplicates(subset=["codigo"])
-
-        df_regulatory_categories = df_regulatory_categories[["codigo", "descricao"]]
-
-        df_regulatory_categories = df_regulatory_categories.rename(columns={"codigo": "codigo_anvisa"})
-        df_regulatory_categories["id_categoria_regulatoria"] = [self._generate_uuid() for _ in range(len(df_regulatory_categories))]
-
-        return df_regulatory_categories
-
-    def _extract_enterprises(self, enterprises: list[dict]) -> pd.DataFrame:
-
-        enterprises = [enterprise for enterprise in enterprises if pd.notnull(enterprise) and enterprise]
-
-        df_enterprises = pd.DataFrame(enterprises)
-        df_enterprises = df_enterprises.dropna(subset=["numeroAutorizacao"])
-        df_enterprises = df_enterprises.drop_duplicates(subset=["numeroAutorizacao"])
-
-        df_enterprises = df_enterprises[["cnpj", "razaoSocial", "numeroAutorizacao"]]
-
-        df_enterprises = df_enterprises.rename(columns={
-            "numeroAutorizacao": "numero_autorizacao_anvisa",
-            "cnpj": "cnpj",
-            "razaoSocial": "razao_social",
-        }
-        )
-        df_enterprises["id_empresa"] = [self._generate_uuid() for _ in range(len(df_enterprises))]
-
-        return df_enterprises
 
     @staticmethod
     def _generate_uuid() -> str:

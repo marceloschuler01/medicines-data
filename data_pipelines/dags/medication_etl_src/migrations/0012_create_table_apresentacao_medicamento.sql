@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS apresentacao_medicamento
  id_apresentacao_medicamento uuid NOT NULL,
  codigo_anvisa               VARCHAR NOT NULL,
  apresentacao                VARCHAR NOT NULL,
- volume_total_em_ml          decimal NOT NULL,
+ quantidade                  VARCHAR NULL,
  via_administracao           VARCHAR NULL,
  tipo_autorizacao_anvisa     VARCHAR NULL,
  registro_ativo              boolean NOT NULL,

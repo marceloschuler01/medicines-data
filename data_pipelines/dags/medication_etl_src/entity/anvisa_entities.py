@@ -28,7 +28,7 @@ class ApresentacaoAnvisa:
     apresentacao: str
     principios_ativos: list[str]
     formas_farmaceuticas: list[str]
-    volume_total_em_ml: Decimal
+    quantidade: str
     via_administracao: str
     embalagens_primarias: list[dict]
     embalagens_secundarias: list[dict]

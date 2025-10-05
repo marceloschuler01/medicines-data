@@ -27,7 +27,7 @@ class AnvisaApresentationsAdapter:
         'apresentacao': 'apresentacao',
         'principiosAtivos': 'principios_ativos',
         'formasFarmaceuticas': 'formas_farmaceuticas',
-        'qtdUnidadeMedida': 'volume_total_em_ml',
+        'qtdUnidadeMedida': 'quantidade',
         'viasAdministracao': 'via_administracao',
         'embalagemPrimariaTodas': 'embalagens_primarias',
         'embalagemSecundariaTodas': 'embalagens_secundarias',
