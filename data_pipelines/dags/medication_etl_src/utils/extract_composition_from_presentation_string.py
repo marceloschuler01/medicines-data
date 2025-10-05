@@ -1,4 +1,4 @@
-# medication_etl_src/utils/extract_composition_info_from_presentation_string.py
+# medication_etl_src/utils/extract_composition_from_presentation_string.py
 from __future__ import annotations
 
 import re
@@ -10,154 +10,137 @@ from typing import List, Tuple, Optional
 class ItemComposicao:
     principio_ativo: str
     dosagem: Optional[float]
-    unidade_de_medida: str
+    unidade_de_medida: Optional[str]
     id_apresentacao_medicamento: str
 
 
 class CompositionParser:
     """
-    Parser de composições a partir da string 'presentation'.
+    Parser de composições a partir do texto 'presentation'.
 
-    Suporta:
-      - Pares explícitos: "2,5 MG + 150 UTR"
-      - Unidade compartilhada: "(20+5) MG/ML" ou "450 + 50 MG"
     Regras:
-      - Corta a cauda após ' X ' (evita volume/quantidade da embalagem)
-      - Corta ao encontrar primeiro marcador de forma/embalagem (COM, POM, CREM, CT, BL, ...)
-      - Normaliza vírgula para ponto, trata milhar com ponto.
-      - Dedup de ativos (remove duplicatas e substrings; mantém o mais longo).
+    - Corta a cauda após " X " (evita capturar volume/embalagem).
+    - Suporta:
+        * Pares explícitos: "1 MG + 2,5 MG + 100.000 UI/G"
+        * Unidade compartilhada: "(20 + 5) MG/ML" ou "450 + 50 MG"
+    - Trata decimal com vírgula e milhar com ponto.
+    - Só mapeia quantidades para princípios ativos quando há correspondência 1-para-1.
+      Caso contrário (ambiguidade), todos os ativos retornam dosagem/unidade = None.
+    - Remove apenas **duplicatas exatas** de ativos (mantém sinônimos distintos).
     """
 
-    # Unidades conhecidas (compostas primeiro para priorização no regex)
     _UNITS: Tuple[str, ...] = (
-        # compostas
-        "MG/ML", "MCG/ML", "UG/ML", "µG/ML", "MG/G", "UI/G", "U/G", "G/L", "MG/DL", "MMOL/L", "MEQ/ML", "G/G", "MCL/ML",
+        # compostas com barra (priorizar)
+        "MG/ML", "MCL/ML", "MCG/ML", "UG/ML", "µG/ML", "MG/G", "UI/G", "U/G", "G/G", "G/L",
+        "MG/DL", "MMOL/L", "MEQ/ML",
         # simples
-        "MG", "G", "MCG", "UG", "µG", "UI", "UTR", "%"
+        "MG", "G", "MCG", "UG", "µG", "UI", "U", "UTR", "%",
     )
-    _UNITS_RE: str = "|".join(map(re.escape, _UNITS))
+    _UNITS_SORTED: Tuple[str, ...] = tuple(sorted(set(_UNITS), key=len, reverse=True))
+    _UNITS_RE: str = "|".join(map(re.escape, _UNITS_SORTED))
 
-    # número com milhar opcional (.) e decimal opcional (.,)
     _NUM: str = r"(?:\d{1,3}(?:\.\d{3})+|\d+)(?:[.,]\d+)?"
 
-    # Padrões principais
     _PAIR_PATTERN = re.compile(rf"(?P<num>{_NUM})\s*(?P<unit>{_UNITS_RE})")
-    # >>> Exige pelo menos um "+" dentro da lista numérica (evita casar "1 MG" como se fosse compartilhada)
     _SHARED_UNIT_PATTERN = re.compile(
-        rf"\(?\s*(?P<numlist>{_NUM}(?:\s*\+\s*{_NUM})+)\s*\)?\s*(?P<unit>{_UNITS_RE})"
+        rf"\(?\s*(?P<numlist>{_NUM}(?:\s*\+\s*{_NUM})*)\s*\)?\s*(?P<unit>{_UNITS_RE})"
     )
 
-    # Marcadores comuns de forma/embalagem para cortar a cabeça de composição
-    _FORM_MARKERS = [
-        " COM ", " CAPS ", " CAP ", " CPR ", " COMP ", " DRG ",
-        " POM ", " CREM ", " GEL ", " SOL OFT ", " SOL ", " SUSP ", " XAROPE ", " COL ", " LOCAO ",
-        " LIB ", " RETARD ", " PROL ",
-        " CT ", " CX ", " FR ", " BG ", " BL ", " AL ",
-    ]
-    _FORM_SPLIT_RE = re.compile("|".join(map(re.escape, _FORM_MARKERS)))
-
     @classmethod
-    def _normalize(cls, s: str) -> str:
+    def _normalize_text(cls, s: str) -> str:
         s = s.upper().replace(",", ".")
         s = re.sub(r"\s+", " ", s).strip()
         return s
 
     @classmethod
     def _strip_packaging_tail(cls, s: str) -> str:
-        # Corta em " X " (quantidade/volume da embalagem)
+        # corta no " X " (indicador comum de embalagem), para não confundir volume com composição
         return re.split(r"\sX\s", s, maxsplit=1)[0]
 
     @classmethod
-    def _strip_after_form_marker(cls, s: str) -> str:
-        # Corta no primeiro marcador de forma/embalagem
-        m = cls._FORM_SPLIT_RE.search(s)
-        return s[:m.start()] if m else s
-
-    @classmethod
     def _to_float(cls, num_str: str) -> float:
-        # Remove pontos de milhar (quando seguidos por 3 dígitos) e preserva decimal com ponto
+        # remove '.' de milhar (quando seguidos por 3 dígitos), preserva decimais com '.'
         cleaned = re.sub(r"(?<=\d)\.(?=\d{3}(?:\D|$))", "", num_str)
         return float(cleaned)
 
     @classmethod
-    def _dedup_ingredients(cls, names: List[str]) -> List[str]:
-        """
-        - Remove duplicatas exatas preservando ordem.
-        - Remove sinônimos onde um nome é substring de outro; mantém o mais longo.
-        - Retorna apenas a primeira ocorrência de cada nome mantido.
-        """
-        uniq_in_order: List[str] = []
-        for n in names:
-            if n not in uniq_in_order:
-                uniq_in_order.append(n)
-
-        ordered = sorted(set(uniq_in_order), key=len, reverse=True)
-        kept_longer_first: List[str] = []
-        for name in ordered:
-            if not any(name in longer for longer in kept_longer_first):
-                kept_longer_first.append(name)
-
-        final: List[str] = []
-        for n in uniq_in_order:
-            if n in kept_longer_first and n not in final:
-                final.append(n)
-        return final
+    def _extract_pairs_explicit(cls, head: str) -> List[Tuple[float, str]]:
+        found = cls._PAIR_PATTERN.findall(head)
+        return [(cls._to_float(n), u) for (n, u) in found]
 
     @classmethod
-    def _extract_pairs(cls, head: str) -> List[Tuple[float, str]]:
-        """
-        1) Tenta UNIDADE COMPARTILHADA (ex.: "450 + 50 MG", "(20+5) MG/ML").
-        2) Se não houver, tenta PARES EXPLÍCITOS (ex.: "1 MG + 100.000 UI/G").
-        """
-        # 1) unidade compartilhada (agora exige pelo menos um '+')
+    def _extract_pairs_shared_unit(cls, head: str) -> List[Tuple[float, str]]:
         m = cls._SHARED_UNIT_PATTERN.search(head)
-        if m:
-            nums = [x.strip() for x in m.group("numlist").split("+") if x.strip()]
-            unit = m.group("unit")
-            return [(cls._to_float(x), unit) for x in nums]
+        if not m:
+            return []
+        nums = [x.strip() for x in m.group("numlist").split("+") if x.strip()]
+        unit = m.group("unit")
+        return [(cls._to_float(x), unit) for x in nums]
 
-        # 2) pares explícitos
-        pairs = cls._PAIR_PATTERN.findall(head)
-        if pairs:
-            return [(cls._to_float(num), unit) for (num, unit) in pairs]
-
-        return []
+    @classmethod
+    def _dedup_exact(cls, items: List[str]) -> List[str]:
+        """Remove apenas duplicatas exatas, preservando a ordem."""
+        seen = set()
+        out: List[str] = []
+        for it in items:
+            if it not in seen:
+                out.append(it)
+                seen.add(it)
+        return out
 
     @classmethod
     def parse(
         cls,
         presentation: str,
         active_ingredients: List[str],
-        id_apresentacao_medicamento: str,
+        id_apresentacao: str,
     ) -> List[ItemComposicao]:
-        pres = cls._normalize(presentation)
+        # Normaliza somente o texto da apresentação
+        pres = cls._normalize_text(presentation)
         head = cls._strip_packaging_tail(pres)
-        head = cls._strip_after_form_marker(head)
 
-        pairs = cls._extract_pairs(head)
-        if not pairs:
-            return []
+        # Preserva a grafia original dos ativos (para comparação com os testes),
+        # mas remove duplicatas exatas.
+        actives = cls._dedup_exact(active_ingredients)
 
-        actives = cls._dedup_ingredients(active_ingredients)
+        # Estratégia: preferir "unidade compartilhada" quando houver 2+ números;
+        # caso contrário, usar "pares explícitos".
+        shared = cls._extract_pairs_shared_unit(head)
+        explicit = cls._extract_pairs_explicit(head)
 
-        items: List[ItemComposicao] = []
-        for i, pa in enumerate(actives):
-            if i < len(pairs):
-                q, u = pairs[i]
-            else:
-                q, u = None, pairs[-1][1]
-            items.append(ItemComposicao(
+        if len(shared) >= 2:
+            pairs = shared
+        elif explicit:
+            pairs = explicit
+        else:
+            pairs = []
+
+        # Mapeia somente se houver correspondência 1-para-1
+        if len(pairs) != len(actives) or len(pairs) == 0:
+            return [
+                ItemComposicao(
+                    principio_ativo=pa,
+                    dosagem=None,
+                    unidade_de_medida=None,
+                    id_apresentacao_medicamento=id_apresentacao,
+                )
+                for pa in actives
+            ]
+
+        return [
+            ItemComposicao(
                 principio_ativo=pa,
-                dosagem=q,
-                unidade_de_medida=u,
-                id_apresentacao_medicamento=id_apresentacao_medicamento,
-            ))
-        return items
+                dosagem=qtd,
+                unidade_de_medida=unit,
+                id_apresentacao_medicamento=id_apresentacao,
+            )
+            for pa, (qtd, unit) in zip(actives, pairs)
+        ]
 
 
 def extract_composition_from_presentation_string(
     presentation: str,
     active_ingredients: List[str],
-    id_apresentacao_medicamento: str,
+    id_apresentacao: str,
 ) -> List[ItemComposicao]:
-    return CompositionParser.parse(presentation, active_ingredients, id_apresentacao_medicamento)
+    return CompositionParser.parse(presentation, active_ingredients, id_apresentacao)

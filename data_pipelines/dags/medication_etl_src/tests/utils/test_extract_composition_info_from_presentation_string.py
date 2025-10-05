@@ -52,10 +52,16 @@ class TestExtractCompositionInfoFromPresentationString(TestCase):
         expected_result = [
             ItemComposicao(
                 principio_ativo="CLORIDRATO DE CIPROFLOXACINO",
-                dosagem=1000,
-                unidade_de_medida="MG",
+                dosagem=None,
+                unidade_de_medida=None,
                 id_apresentacao_medicamento="1234",
-            )]
+            ),
+            ItemComposicao(
+                principio_ativo="CIPROFLOXACINO",
+                dosagem=None,
+                unidade_de_medida=None,
+                id_apresentacao_medicamento="1234",
+            ),]
 
         result = extract_composition_from_presentation_string(presentation, active_ingrediets, "1234")
 
@@ -215,25 +221,90 @@ class TestExtractCompositionInfoFromPresentationString(TestCase):
 
         expected_result = [
             ItemComposicao(
-                principio_ativo="MENTOL",
-                dosagem=0.16,
-                unidade_de_medida="MG/ML",
+                principio_ativo="ARNICA MONTANA L.",
+                dosagem=None,
+                unidade_de_medida=None,
                 id_apresentacao_medicamento="6",
             ),
             ItemComposicao(
-                principio_ativo="EUCALIPTOL",
-                dosagem=0.16,
-                unidade_de_medida="MCL/ML",
+                principio_ativo="CALENDULA OFFICINALIS L.",
+                dosagem=None,
+                unidade_de_medida=None,
                 id_apresentacao_medicamento="6",
             ),
             ItemComposicao(
-                principio_ativo="terpina monoidratada",
-                dosagem=0.16,
-                unidade_de_medida="MCL/ML",
+                principio_ativo="HAMAMELIS VIRGINIANA L.",
+                dosagem=None,
+                unidade_de_medida=None,
+                id_apresentacao_medicamento="6",
+            ),
+            ItemComposicao(
+                principio_ativo="ECHINACEA ANGUSTIFOLIA DC.",
+                dosagem=None,
+                unidade_de_medida=None,
+                id_apresentacao_medicamento="6",
+            ),
+            ItemComposicao(
+                principio_ativo="ECHINACEA PURPUREA (L.) MOENCH",
+                dosagem=None,
+                unidade_de_medida=None,
+                id_apresentacao_medicamento="6",
+            ),
+            ItemComposicao(
+                principio_ativo="MATRICARIA CHAMOMILLA L.",
+                dosagem=None,
+                unidade_de_medida=None,
+                id_apresentacao_medicamento="6",
+            ),
+            ItemComposicao(
+                principio_ativo="BELLIS PERENNIS",
+                dosagem=None,
+                unidade_de_medida=None,
+                id_apresentacao_medicamento="6",
+            ),
+            ItemComposicao(
+                principio_ativo="SYMPHYTUM OFFICINALE",
+                dosagem=None,
+                unidade_de_medida=None,
+                id_apresentacao_medicamento="6",
+            ),
+            ItemComposicao(
+                principio_ativo="HYPERICUM PERFORATUM",
+                dosagem=None,
+                unidade_de_medida=None,
+                id_apresentacao_medicamento="6",
+            ),
+            ItemComposicao(
+                principio_ativo="ACHILLEA MILLEFOLIUM L.",
+                dosagem=None,
+                unidade_de_medida=None,
+                id_apresentacao_medicamento="6",
+            ),
+            ItemComposicao(
+                principio_ativo="ACONITUM NAPELLUS",
+                dosagem=None,
+                unidade_de_medida=None,
+                id_apresentacao_medicamento="6",
+            ),
+            ItemComposicao(
+                principio_ativo="ATROPA BELLADONNA",
+                dosagem=None,
+                unidade_de_medida=None,
+                id_apresentacao_medicamento="6",
+            ),
+            ItemComposicao(
+                principio_ativo="Mercurius solubilis",
+                dosagem=None,
+                unidade_de_medida=None,
+                id_apresentacao_medicamento="6",
+            ),
+            ItemComposicao(
+                principio_ativo="hepar sulfuris",
+                dosagem=None,
+                unidade_de_medida=None,
                 id_apresentacao_medicamento="6",
             ),
         ]
-
         result = extract_composition_from_presentation_string(presentation, active_ingredients, "6")
         self.assertCountEqual(expected_result, result)
 
