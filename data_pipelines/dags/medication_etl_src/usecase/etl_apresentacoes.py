@@ -24,21 +24,27 @@ class ExtractTransformAndLoadApresentacoes:
 
     def main(self) -> None:
 
+        self._etl_presentations_with_pagination(from_active_medines=True)
+        # TODO Enable from inactive medicines
+        #self._etl_presentations_with_pagination(from_active_medines=False)
+
+    def _etl_presentations_with_pagination(self, from_active_medines: bool) -> None:
+
         page = 1
 
         while True:
 
-            apresentacoes = self._read_from_staging_db(page=page)
+            apresentacoes = self._read_from_staging_db(active_medicines=from_active_medines, page=page)
             if not apresentacoes:
                 break
 
-            print("Processing page:", page, "with", len(apresentacoes), "presentations")
-            self._extract_transform_and_load(apresentacoes=apresentacoes)
+            print(f"Processing presentations from {'in' if not from_active_medines else ''}active medicines. Page:", page, "with", len(apresentacoes), "presentations")
+            self._extract_transform_and_load(active_medicines=from_active_medines, apresentacoes=apresentacoes)
 
             page += 1
 
     @with_database_connection
-    def _extract_transform_and_load(self, apresentacoes: list[dict], conn=None):
+    def _extract_transform_and_load(self, active_medicines: bool, apresentacoes: list[dict], conn=None):
 
         parsed_data = AnvisaApresentationsAdapter().adapt(apresentacoes=apresentacoes)
 
@@ -51,7 +57,7 @@ class ExtractTransformAndLoadApresentacoes:
 
             df_presentations["codigo_anvisa_medicamento"] = df_presentations["codigo_anvisa_medicamento"].astype(str)
 
-            medicines_codigo_anvisa_to_id_mapper = self._get_medicines_from_presentations_id_mapper(presentations=df_presentations, conn=conn)
+            medicines_codigo_anvisa_to_id_mapper = self._get_medicines_from_presentations_id_mapper(active_medicines=active_medicines, presentations=df_presentations, conn=conn)
 
             df_presentations["id_medicamento"] = df_presentations["codigo_anvisa_medicamento"].map(medicines_codigo_anvisa_to_id_mapper)
 
@@ -62,9 +68,12 @@ class ExtractTransformAndLoadApresentacoes:
 
             df_presentations = self._extract_other_entities_data_from_presentations(presentations=df_presentations, conn=conn)
 
-    def _read_from_staging_db(self, page: int) -> list[dict]:
+    def _read_from_staging_db(self, active_medicines: bool, page: int) -> list[dict]:
 
-        presentations = self.staging_db.select("presentations_from_active_medicines", page=page, page_size=1000)
+        if active_medicines:
+            presentations = self.staging_db.select("presentations_from_active_medicines", page=page, page_size=1000)
+        else:
+            presentations = self.staging_db.select("presentations_from_inactive_medicines", page=page, page_size=1000)
 
         return presentations
 
@@ -127,11 +136,13 @@ class ExtractTransformAndLoadApresentacoes:
         return compositions[["id_apresentacao_medicamento", "id_principio_ativo", "dosagem", "unidade_de_medida"]]
 
     @with_database_connection
-    def _get_medicines_from_presentations_id_mapper(self, presentations: pd.DataFrame, conn=None) -> dict[str, str]:
+    def _get_medicines_from_presentations_id_mapper(self, active_medicines: bool, presentations: pd.DataFrame, conn=None) -> dict[str, str]:
 
         codigos_medicamento = presentations["codigo_anvisa_medicamento"].dropna().unique().tolist()
 
-        medicines = sql.select_with_pandas("medicamento", filters=sql.filter("codigo_anvisa", codigos_medicamento, "IN"), columns=["id_medicamento", "codigo_anvisa"], conn=conn)
+        filters = [sql.filter("registro_ativo", active_medicines), sql.filter("codigo_anvisa", codigos_medicamento, "IN")]
+
+        medicines = sql.select_with_pandas("medicamento", filters=filters, columns=["id_medicamento", "codigo_anvisa"], conn=conn)
 
         return medicines.set_index("codigo_anvisa")["id_medicamento"].to_dict()
 
