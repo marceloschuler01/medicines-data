@@ -24,6 +24,7 @@ class ExtractTransformAndLoadFromStagingDBToMedicinesDB:
     @with_database_connection
     def main(self, conn=None):
 
+        self._delete_all_old_medicines_data(conn=conn)
         medicines = self._read_from_staging_db_and_parse_data()
 
         df_medicines = pd.DataFrame([asdict(item) for item in medicines])
@@ -47,6 +48,15 @@ class ExtractTransformAndLoadFromStagingDBToMedicinesDB:
         LoadMedicinesToDB().main(df_medicines=df_medicines, conn=conn)
 
         return df_medicines
+
+    @with_database_connection
+    def _delete_all_old_medicines_data(self, conn=None) -> None:
+
+        print("Deleting all old medicines data...")
+        sql.delete(table_name="medicamento", conn=conn)
+        sql.delete(table_name="categoria_regulatoria", conn=conn)
+        sql.delete(table_name="empresa", conn=conn)
+        print("Delete completed.")
 
     def _read_from_staging_db_and_parse_data(self) -> list[MedicineAnvisa]:
 
