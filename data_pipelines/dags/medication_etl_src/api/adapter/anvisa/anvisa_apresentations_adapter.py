@@ -1,7 +1,7 @@
 import pandas as pd
 from dataclasses import dataclass
 from medication_etl_src.entity.anvisa_entities import ProdutoApresentacaoAnvisa, ApresentacaoAnvisa, AcondicionamentoAnvisa
-
+from medication_etl_src.utils import split_active_principles_strings
 
 @dataclass
 class ResultParseApresentacoesAnvisa:
@@ -19,6 +19,7 @@ class AnvisaApresentationsAdapter:
         #'numeroRegistro': 'numero_registro_anvisa',
         'apresentacoes': 'apresentacoes',
         'acondicionamentos': 'acondicionamentos',
+        'principioAtivo': 'principio_ativo_nivel_produto',
     }
 
     APRESENTACOES_MAPPER = {
@@ -67,19 +68,36 @@ class AnvisaApresentationsAdapter:
         apresentacoes = apresentacoes[[k for k in self.PRODUTO_MAPPER]]
         apresentacoes = apresentacoes.rename(columns=self.PRODUTO_MAPPER)
 
+        apresentacoes["principio_ativo_nivel_produto"] = apresentacoes["principio_ativo_nivel_produto"].apply(split_active_principles_strings)
+
         produtos = apresentacoes.copy()
         
-        apresentacoes = produtos[["codigo_anvisa", "apresentacoes"]]
+        apresentacoes = produtos[["codigo_anvisa", "apresentacoes", "principio_ativo_nivel_produto"]]
         apresentacoes = apresentacoes.dropna(subset="apresentacoes")
         apresentacoes = apresentacoes[apresentacoes["apresentacoes"].apply(lambda x: isinstance(x, list) and len(x) > 0)]
         if not apresentacoes.empty:
             apresentacoes = apresentacoes.explode("apresentacoes").reset_index(drop=True)
             codigos_anvisa = apresentacoes["codigo_anvisa"].copy()
+            principios_ativos_produto = apresentacoes["principio_ativo_nivel_produto"].copy()
             apresentacoes = pd.json_normalize(apresentacoes["apresentacoes"])
             apresentacoes["codigo_anvisa_medicamento"] = codigos_anvisa
             apresentacoes = apresentacoes[[k for k in self.APRESENTACOES_MAPPER]]
             apresentacoes = apresentacoes.rename(columns=self.APRESENTACOES_MAPPER)
+            apresentacoes["principio_ativo_nivel_produto"] = principios_ativos_produto
+
+            # Some presentations have null in the "principiosAtivos" field, we remove these nulls from the list
+            apresentacoes["principios_ativos"] = apresentacoes["principios_ativos"].apply(
+                lambda x: [item for item in x if item is not None] if isinstance(x, list) else x
+            )
+
+            # Some presentations are missing the "principiosAtivos" field, so we fill with the value from the product level
+            apresentacoes["principios_ativos"] = apresentacoes.apply(
+                lambda x: x["principios_ativos"] if isinstance(x["principios_ativos"], list) and len(x["principios_ativos"]) > 0 else x["principio_ativo_nivel_produto"],
+                axis=1
+            )
             apresentacoes["via_administracao"] = apresentacoes["via_administracao"].apply(lambda x: x[0] if isinstance(x, list) and len(x) > 0 else None)
+
+            apresentacoes = apresentacoes.drop(columns=["principio_ativo_nivel_produto"])
             apresentacoes = apresentacoes.apply(lambda row: ApresentacaoAnvisa(**row), axis=1).tolist()
         else:
             apresentacoes = []
@@ -97,7 +115,7 @@ class AnvisaApresentationsAdapter:
         else:
             acondicionamentos = []
 
-        produtos = produtos.drop(columns=["apresentacoes", "acondicionamentos"])
+        produtos = produtos.drop(columns=["apresentacoes", "acondicionamentos", "principio_ativo_nivel_produto"])
         produtos = produtos.apply(lambda row: ProdutoApresentacaoAnvisa(**row), axis=1).tolist()
 
         result = ResultParseApresentacoesAnvisa(
