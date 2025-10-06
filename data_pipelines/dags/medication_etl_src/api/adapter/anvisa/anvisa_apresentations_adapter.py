@@ -20,6 +20,7 @@ class AnvisaApresentationsAdapter:
         'apresentacoes': 'apresentacoes',
         'acondicionamentos': 'acondicionamentos',
         'principioAtivo': 'principio_ativo_nivel_produto',
+        'medicamentoReferencia': 'medicamento_referencia',
     }
 
     APRESENTACOES_MAPPER = {

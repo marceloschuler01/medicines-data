@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS apresentacao_medicamento
  ean_gtin                    VARCHAR NULL,
  ean_2                       VARCHAR NULL,
  CONSTRAINT PK_4 PRIMARY KEY ( id_apresentacao_medicamento ),
- CONSTRAINT FK_12_1 FOREIGN KEY ( id_medicamento ) REFERENCES medicamento ( id_medicamento )
+ CONSTRAINT FK_12_1 FOREIGN KEY ( id_medicamento ) REFERENCES medicamento ( id_medicamento ) ON DELETE CASCADE
 );
 
 
