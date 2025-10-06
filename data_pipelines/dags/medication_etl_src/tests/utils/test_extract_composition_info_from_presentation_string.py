@@ -308,7 +308,7 @@ class TestExtractCompositionInfoFromPresentationString(TestCase):
         result = extract_composition_from_presentation_string(presentation, active_ingredients, "6")
         self.assertCountEqual(expected_result, result)
 
-    def test_extract_composition_info_from_presentation_6(self):
+    def test_extract_composition_info_from_presentation_10(self):
 
         presentation = "200 MG COM LIB CONT CT BL AL PLAS INC X 20"
         active_ingredients = [None]
@@ -316,4 +316,29 @@ class TestExtractCompositionInfoFromPresentationString(TestCase):
         expected_result = []
 
         result = extract_composition_from_presentation_string(presentation, active_ingredients, "6")
+        self.assertCountEqual(expected_result, result)
+
+    def test_extract_composition_info_from_presentation_11(self):
+
+        presentation = "(500,0 + 65 ,0) MG COM EFEV CT  STR AL POLIET X 4"
+        active_ingredients = [
+                    "PARACETAMOL",
+                    "CAFEÍNA ANIDRA"
+                ]
+
+        expected_result = [
+            ItemComposicao(
+                principio_ativo="PARACETAMOL",
+                dosagem=500.0,
+                unidade_de_medida="MG",
+                id_apresentacao_medicamento="429701128",
+            ),
+            ItemComposicao(
+                principio_ativo="CAFEÍNA ANIDRA",
+                dosagem=65.0,
+                unidade_de_medida="MG",
+                id_apresentacao_medicamento="429701128",
+            ),
+        ]
+        result = extract_composition_from_presentation_string(presentation, active_ingredients, "429701128")
         self.assertCountEqual(expected_result, result)

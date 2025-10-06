@@ -78,6 +78,11 @@ class CompositionParser:
         return [(cls._to_float(x), unit) for x in nums]
 
     @classmethod
+    def _fix_spaced_decimals(cls, s: str) -> str:
+        # Une padrões do tipo "65 ,0" / "65 . 0" -> "65.0"
+        return re.sub(r"(\d+)\s*[.,]\s*(\d+)", r"\1.\2", s)
+
+    @classmethod
     def _dedup_exact(cls, items: List[str]) -> List[str]:
         """Remove apenas duplicatas exatas, preservando a ordem."""
         seen = set()
@@ -98,6 +103,7 @@ class CompositionParser:
         # Normaliza somente o texto da apresentação
         pres = cls._normalize_text(presentation)
         head = cls._strip_packaging_tail(pres)
+        head = cls._fix_spaced_decimals(head)
 
         if None in active_ingredients:
             active_ingredients = [pa for pa in active_ingredients if pa is not None]
