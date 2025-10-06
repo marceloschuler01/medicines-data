@@ -4,11 +4,11 @@ CREATE TABLE IF NOT EXISTS medicamento
  codigo_anvisa                   VARCHAR NULL,
  codigo_notificacao_anvisa       VARCHAR NULL,
  nome_comercial                  VARCHAR NULL,
- numero_registro_anvisa          VARCHAR NULL, -- TODO CHANGE FOR REGISTRO (TÁ ESCRITORIO ERRADO)
+ numero_registro_anvisa          VARCHAR NULL,
  numero_processo_anvisa          VARCHAR NULL,
  tipo_autorizacao_anvisa         VARCHAR NULL,
  data_registro_anvisa            VARCHAR NULL,
- data_vencimento_regsitro_anvisa date NULL,
+ data_vencimento_regsitro_anvisa date NULL,   -- TODO CHANGE FOR REGISTRO (TÁ ESCRITORIO ERRADO)
  registro_ativo                  boolean NULL,
  id_categoria_regulatoria        uuid NULL,
  id_empresa                      uuid NULL,
@@ -20,3 +20,5 @@ CREATE TABLE IF NOT EXISTS medicamento
  CONSTRAINT FK_15 FOREIGN KEY ( id_medicamento_referencia ) REFERENCES medicamento ( id_medicamento ),
  CONSTRAINT FK_2 FOREIGN KEY ( id_empresa ) REFERENCES empresa ( id_empresa )
 );
+CREATE INDEX IF NOT EXISTS idx_id_medicamento_referencia ON medicamento ( id_medicamento_referencia )
+;

@@ -15,5 +15,6 @@ CREATE TABLE IF NOT EXISTS apresentacao_medicamento
  CONSTRAINT PK_4 PRIMARY KEY ( id_apresentacao_medicamento ),
  CONSTRAINT FK_12_1 FOREIGN KEY ( id_medicamento ) REFERENCES medicamento ( id_medicamento ) ON DELETE CASCADE
 );
+CREATE INDEX IF NOT EXISTS idx_id_medicamento ON apresentacao_medicamento ( id_medicamento );
 
 
