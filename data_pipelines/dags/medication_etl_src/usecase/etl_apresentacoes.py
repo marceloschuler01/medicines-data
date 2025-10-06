@@ -22,13 +22,23 @@ class ExtractTransformAndLoadApresentacoes:
     def __init__(self, staging_db=StagingDB()):
         self.staging_db = staging_db
 
-    def main(self) -> None:
+    @with_database_connection
+    def main(self, conn=None) -> None:
 
-        self._etl_presentations_with_pagination(from_active_medines=True)
+        self._delete_all_old_presentations_data(conn=conn)
+        self._etl_presentations_with_pagination(from_active_medines=True, conn=conn)
         # TODO Enable from inactive medicines
         #self._etl_presentations_with_pagination(from_active_medines=False)
 
-    def _etl_presentations_with_pagination(self, from_active_medines: bool) -> None:
+    @with_database_connection
+    def _delete_all_old_presentations_data(self, conn=None) -> None:
+
+        print("Deleting all old presentations data...")
+        sql.delete(table_name="apresentacao_medicamento", conn=conn)
+        print("Delete completed.")
+
+    @with_database_connection
+    def _etl_presentations_with_pagination(self, from_active_medines: bool, conn=None) -> None:
 
         page = 1
 
@@ -39,7 +49,7 @@ class ExtractTransformAndLoadApresentacoes:
                 break
 
             print(f"Processing presentations from {'in' if not from_active_medines else ''}active medicines. Page:", page, "with", len(apresentacoes), "presentations")
-            self._extract_transform_and_load(active_medicines=from_active_medines, apresentacoes=apresentacoes)
+            self._extract_transform_and_load(active_medicines=from_active_medines, apresentacoes=apresentacoes, conn=conn)
 
             page += 1
 
