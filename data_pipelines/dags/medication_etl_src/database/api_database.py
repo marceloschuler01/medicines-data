@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from io import StringIO
 from typing import Any
+import uuid
 
 from medication_etl_src.database.db_connector import PostgresConnection, with_database_connection
 
@@ -102,6 +103,109 @@ class ApiDatabase:
     @with_database_connection
     def execute(query: str, params: dict | None = None, conn: PostgresConnection=None) -> None:
         conn.execute_query(query, params=params, fetch=False)
+
+    @staticmethod
+    @with_database_connection
+    def update_in_bulk(
+        table_name: str,
+        data: pd.DataFrame,
+        filter_column: str,
+        *,
+        skip_unchanged: bool = True,
+        conn: PostgresConnection = None,
+    ) -> int:
+        """
+        Update rows in `table_name` using values from a pandas DataFrame.
+        - `data` must contain the `filter_column` and 1+ columns to update.
+        - All non-filter columns in `data` will be updated.
+        - Returns an approximate count of rows that will be updated (matches).
+        """
+        if data is None or data.empty:
+            return 0
+
+        # 1) Validate columns against the table
+        table_cols = ApiDatabase.get_columns(table_name=table_name, conn=conn)
+        if not table_cols:
+            raise ValueError(f"Table '{table_name}' not found or has no columns.")
+
+        if filter_column not in data.columns:
+            raise ValueError(f"Filter column '{filter_column}' not found in DataFrame.")
+
+        if filter_column not in table_cols:
+            raise ValueError(f"Filter column '{filter_column}' not found in table '{table_name}'.")
+
+        # columns to update = all dataframe columns minus the filter column
+        update_cols = [c for c in data.columns if c != filter_column]
+        if not update_cols:
+            raise ValueError("Provide at least one column to update besides the filter column.")
+
+        # Also ensure all update columns exist in the table
+        missing = [c for c in update_cols if c not in table_cols]
+        if missing:
+            raise ValueError(f"Columns not found in table '{table_name}': {missing}")
+
+        # 2) Create a temp table with *the same structure* (types) as the target table
+        #    This avoids any type-casting headaches.
+        temp_name = f"tmp_upd_{uuid.uuid4().hex[:10]}"
+        conn.execute_query(
+            f'CREATE TEMP TABLE {temp_name} AS SELECT * FROM {table_name} WHERE false;',
+            fetch=False
+        )
+
+        # 3) COPY DataFrame rows into the temp table (only the needed columns)
+        #    Keep it simple: CSV via StringIO, like your insert_with_copy.
+        load_cols = [filter_column] + update_cols
+        df = data[load_cols].copy()
+
+        sep = ","
+        null_value = "NULL"
+        quote = '\"'
+
+        buf = StringIO()
+        df.to_csv(buf, index=False, header=False, sep=sep, na_rep=null_value, quotechar=quote)
+        buf.seek(0)
+
+        conn.copy_expert(
+            query=(
+                f"COPY {temp_name} ({', '.join(load_cols)}) "
+                f"FROM STDIN WITH (FORMAT CSV, DELIMITER '{sep}', NULL '{null_value}', QUOTE '{quote}')"
+            ),
+            file=buf
+        )
+
+        # 4) (Optional) count how many rows will be touched (approx; before update)
+        #    We use the same join and, if requested, the same 'changed' predicate.
+        base_join = f"FROM {table_name} t JOIN {temp_name} s ON t.{filter_column} = s.{filter_column}"
+        if skip_unchanged:
+            diff_pred = " OR ".join([f"t.{c} IS DISTINCT FROM s.{c}" for c in update_cols])
+            count_sql = f"SELECT COUNT(*) {base_join} WHERE {diff_pred};"
+        else:
+            count_sql = f"SELECT COUNT(*) {base_join};"
+
+        matches = conn.execute_query(count_sql, fetch=True)[0][0]
+
+        # 5) Build and perform the single UPDATE … FROM
+        set_clause = ", ".join([f"{c} = s.{c}" for c in update_cols])
+        if skip_unchanged:
+            diff_pred = " OR ".join([f"t.{c} IS DISTINCT FROM s.{c}" for c in update_cols])
+            where_extra = f" AND ({diff_pred})"
+        else:
+            where_extra = ""
+
+        update_sql = f"""
+            UPDATE {table_name} AS t
+            SET {set_clause}
+            FROM {temp_name} AS s
+            WHERE t.{filter_column} = s.{filter_column}
+            {where_extra};
+        """
+        conn.execute_query(update_sql, fetch=False)
+
+        # Temp table drops automatically at session end; explicitly drop to be tidy:
+        conn.execute_query(f"DROP TABLE IF EXISTS {temp_name};", fetch=False)
+
+        return int(matches)
+
 
     @staticmethod
     def _parse_filters(filters: list[Filter] | Filter, params: dict) -> str:
