@@ -58,6 +58,12 @@ class ExtractTransformAndLoadApresentacoes:
 
         parsed_data = AnvisaApresentationsAdapter().adapt(apresentacoes=apresentacoes)
 
+        df_produtos = pd.DataFrame([asdict(item) for item in parsed_data.produtos])
+        del parsed_data.produtos
+        df_produtos = self._join_products_with_medicine_id(active_medicines=active_medicines, products=df_produtos, conn=conn)
+        self._update_id_medicamento_referencia_in_medicines(active_medicines=active_medicines, products=df_produtos, conn=conn)
+        del df_produtos
+
         df_presentations = pd.DataFrame([asdict(item) for item in parsed_data.apresentacoes])
         del parsed_data.apresentacoes
 
@@ -155,6 +161,51 @@ class ExtractTransformAndLoadApresentacoes:
         medicines = sql.select_with_pandas("medicamento", filters=filters, columns=["id_medicamento", "codigo_anvisa"], conn=conn)
 
         return medicines.set_index("codigo_anvisa")["id_medicamento"].to_dict()
+
+    @with_database_connection
+    def _update_id_medicamento_referencia_in_medicines(self, active_medicines: bool, products: pd.DataFrame, conn=None) -> None:
+
+        products = products[["id_medicamento", "medicamento_referencia"]].copy()
+
+        filters = sql.filter("registro_ativo", active_medicines)
+        medicines = sql.select_with_pandas("medicamento", columns=["id_medicamento", "nome_comercial"], filters=filters, conn=conn)
+
+        medicines = medicines.drop_duplicates(subset="nome_comercial")
+
+        medicines = medicines.dropna(subset=["nome_comercial"])
+        products = products.dropna(subset=["medicamento_referencia"])
+
+        products["medicamento_referencia"] = products["medicamento_referencia"].str.strip().replace("", pd.NA)
+        medicines["nome_comercial"] = medicines["nome_comercial"].str.strip().replace("", pd.NA)
+
+        medicines = medicines.dropna(subset=["nome_comercial"])
+        products = products.dropna(subset=["medicamento_referencia"])
+
+        medicines_mapper = medicines.set_index("nome_comercial")["id_medicamento"].to_dict()
+
+        products["id_medicamento_referencia"] = products["medicamento_referencia"].map(medicines_mapper)
+        products = products.dropna(subset=["id_medicamento_referencia"])
+
+        products = products[["id_medicamento", "id_medicamento_referencia"]]
+
+        sql.update_in_bulk(table_name="medicamento", data=products, filter_column="id_medicamento", conn=conn)
+
+    @with_database_connection
+    def _join_products_with_medicine_id(self, active_medicines: bool, products: pd.DataFrame, conn=None) -> pd.DataFrame:
+
+        filters = sql.filter("registro_ativo", active_medicines)
+        medicines = sql.select_with_pandas("medicamento", columns=["id_medicamento", "codigo_anvisa"], filters=filters, conn=conn)
+
+        medicines["codigo_anvisa"] = medicines["codigo_anvisa"].astype("int64")
+        products["codigo_anvisa"] = products["codigo_anvisa"].astype("int64")
+
+        medicines = medicines.drop_duplicates(subset="codigo_anvisa")
+        medicines = medicines.dropna(subset=["codigo_anvisa"])
+
+        mapper_codigo_anvisa_to_id = medicines.set_index("codigo_anvisa")["id_medicamento"].to_dict()
+        products["id_medicamento"] = products["codigo_anvisa"].map(mapper_codigo_anvisa_to_id)
+
+        return products
 
     @staticmethod
     def _generate_uuid() -> str:
