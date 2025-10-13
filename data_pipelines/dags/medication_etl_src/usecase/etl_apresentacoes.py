@@ -28,7 +28,7 @@ class ExtractTransformAndLoadApresentacoes:
         self._delete_all_old_presentations_data(conn=conn)
         self._etl_presentations_with_pagination(from_active_medines=True, conn=conn)
         # TODO Enable from inactive medicines
-        #self._etl_presentations_with_pagination(from_active_medines=False)
+        self._etl_presentations_with_pagination(from_active_medines=False, conn=conn)
 
     @with_database_connection
     def _delete_all_old_presentations_data(self, conn=None) -> None:
@@ -66,6 +66,10 @@ class ExtractTransformAndLoadApresentacoes:
 
         df_presentations = pd.DataFrame([asdict(item) for item in parsed_data.apresentacoes])
         del parsed_data.apresentacoes
+        if "apresentacao" not in df_presentations.columns:
+            df_presentations["apresentacao"] = None
+
+        df_presentations = df_presentations.dropna(subset=["apresentacao"])
 
         if not df_presentations.empty:
 
@@ -87,9 +91,9 @@ class ExtractTransformAndLoadApresentacoes:
     def _read_from_staging_db(self, active_medicines: bool, page: int) -> list[dict]:
 
         if active_medicines:
-            presentations = self.staging_db.select("presentations_from_active_medicines", page=page, page_size=1000)
+            presentations = self.staging_db.select("presentations_from_active_medicines", page=page, page_size=5000)
         else:
-            presentations = self.staging_db.select("presentations_from_inactive_medicines", page=page, page_size=1000)
+            presentations = self.staging_db.select("presentations_from_inactive_medicines", page=page, page_size=5000)
 
         return presentations
 
