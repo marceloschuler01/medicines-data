@@ -25,6 +25,7 @@ class ApresentacaoAnvisa:
 
     codigo_anvisa: str
     codigo_anvisa_medicamento: str
+    numero_registro_anvisa: str
     apresentacao: str
     principios_ativos: list[str]
     formas_farmaceuticas: list[str]

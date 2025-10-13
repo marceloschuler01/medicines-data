@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS apresentacao_medicamento
 (
  id_apresentacao_medicamento uuid NOT NULL,
  codigo_anvisa               VARCHAR NOT NULL,
+ numero_registro_anvisa      VARCHAR,
  apresentacao                VARCHAR NOT NULL,
  quantidade                  VARCHAR NULL,
  via_administracao           VARCHAR NULL,

@@ -26,6 +26,7 @@ class AnvisaApresentationsAdapter:
     APRESENTACOES_MAPPER = {
         'codigo': 'codigo_anvisa',
         'codigo_anvisa_medicamento': 'codigo_anvisa_medicamento',
+        'registro': 'numero_registro_anvisa',
         'apresentacao': 'apresentacao',
         'principiosAtivos': 'principios_ativos',
         'formasFarmaceuticas': 'formas_farmaceuticas',
