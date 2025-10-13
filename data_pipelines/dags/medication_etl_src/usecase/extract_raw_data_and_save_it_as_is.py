@@ -1,14 +1,18 @@
-from medication_etl_src.api.api_anvisa import ApiAnvisa
+import sys
 import json
 import pandas as pd
 
+from medication_etl_src.api.api_anvisa import ApiAnvisa
+from medication_etl_src.api.api_cmed import ApiCMED
+
 PATH_TO_SAVE_DATA="C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/temp_files/"
 
-class GetRawDataAndSaveItAsIs():
+class GetRawDataAndSaveItAsIs:
 
-    def __init__(self, api=ApiAnvisa, path_to_save_data=None):
+    def __init__(self, api=ApiAnvisa, api_cmed=ApiCMED, path_to_save_data=None):
         self.api = api()
-        self.PATH_TO_SAVE_DATA = path_to_save_data or PATH_TO_SAVE_DATA
+        self.api_cmed = api_cmed()
+        self.PATH_TO_SAVE_DATA = path_to_save_data or (sys.path[0] + '/')
         self.PRESENTATIONS_PER_TIME_IN_GET_PRESENTATIONS: int = 800
 
     def get_raw_data_and_save_it_as_is(self):
@@ -19,6 +23,7 @@ class GetRawDataAndSaveItAsIs():
         self.extract_and_save_pharmaceutic_forms()
         self.extract_and_save_presentations()
         self.extract_and_save_presentations_from_inactive_medicines()
+        self.extract_preco_maximo_consumidor_data()
 
     def extract_and_save_active_medicines_data(self):
 
@@ -37,6 +42,16 @@ class GetRawDataAndSaveItAsIs():
     def extract_and_save_presentations_from_inactive_medicines(self):
 
         self.extract_and_save_presentations_from_medicines(medicines_table='inactive_medicines')
+
+    def extract_preco_maximo_consumidor_data(self):
+
+        data = self.api_cmed.get_preco_maximo_consumidor()
+        self.save_json(data=data.to_dict(orient="records"), filename="preco_maximo_consumidor.json")
+
+    def extract_preco_maximo_governo_data(self):
+
+        data = self.api_cmed.get_preco_maximo_governo()
+        self.save_json(data=data.to_dict(orient="records"), filename="preco_maximo_governo.json")
     
     def extract_and_save_presentations_from_medicines(self, medicines_table: str):
 
