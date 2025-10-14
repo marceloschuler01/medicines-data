@@ -6,7 +6,7 @@ class StagingDB:
     def __init__(self):
         pass
     
-    def select(self, tablename: str, page: int = None, page_size: int = 1000) -> list[dict]:
+    def select(self, tablename: str, page: int = None, page_size: int = 5000) -> list[dict]:
         
         with open(f'/home/aawz/Documentos/ufsc/tcc/medicines-data/data_pipelines/dags/temp_files/2025-05-10{tablename}.json', 'r', encoding="utf8") as f:
             data = json.load(f)
