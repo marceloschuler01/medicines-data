@@ -8,8 +8,7 @@ from medication_etl_src.database.api_database import ApiDatabase as sql
 from medication_etl_src.database.db_connector import with_database_connection
 from medication_etl_src.entity.cmed_entites import CmedPriceDefinition
 from medication_etl_src.staging_db.staging_db import StagingDB
-
-
+from medication_etl_src.utils.split_tax_definition_from_string import split_tax_definition_from_string
 
 
 class ETLMaxConsumerPrice:
@@ -52,8 +51,14 @@ class ETLMaxConsumerPrice:
 
         self._update_presentations_with_cmed_info(df_price_data=df_price_data, conn=conn)
 
-        pass
+        df_price_medicines = self._transform_price_data(df_price_data=df_price_data)
 
+        df_price_medicines['id_tipo_preco_maximo'] = self._get_id_tipo_preco_maximo_and_add_missing(df_price_medicines["tipo_aliquota"].tolist(), conn=conn)
+        df_price_medicines['id_aliquota_imposto'] = self._get_id_aliquota_imposto_and_add_missing(df_price_medicines["porcentagem_aliquota"].tolist(), conn=conn)
+
+        df_price_medicines = df_price_medicines.dropna(subset=["id_apresentacao_medicamento"])
+
+        self._load_price_data(df_price_medicines=df_price_medicines, conn=conn)
 
     def _update_presentations_with_cmed_info(self, df_price_data: pd.DataFrame, conn=None):
 
@@ -73,6 +78,65 @@ class ETLMaxConsumerPrice:
 
         return presentations.set_index("numero_registro_anvisa")["id_apresentacao_medicamento"].to_dict()
 
+    def _transform_price_data(self, df_price_data: pd.DataFrame) -> pd.DataFrame:
+
+        df = df_price_data.copy()
+
+        df = (
+            df
+            .set_index(['id_apresentacao_medicamento'])
+            ['aliquotas']
+            .apply(pd.Series)
+            .stack()
+            .reset_index()
+            .rename(columns={'level_1': 'tipo', 0: 'valor_maximo'})
+        )
+
+        df['valor_maximo'] = df['valor_maximo'].apply(lambda x: x.replace(',', '.').replace('*', '')).astype('float')
+
+        df[['tipo_aliquota', 'porcentagem_aliquota']] = (
+            df['tipo']
+            .apply(split_tax_definition_from_string)  # retorna tupla
+            .apply(pd.Series)  # transforma em colunas separadas
+        )
+
+        return df
+
+    @with_database_connection
+    def _get_id_tipo_preco_maximo_and_add_missing(self, tipos_preco_maximo: list[str], conn=None) -> list[str]:
+
+        types_in_db = sql.select("tipo_preco_maximo", filters=sql.filter("nome", tipos_preco_maximo, "IN"), columns=["id_tipo_preco_maximo", "nome"], conn=conn)
+        missing_types = set(tipos_preco_maximo) - set([x['nome'] for x in types_in_db])
+
+        df_missing_types = pd.DataFrame({"nome": list(missing_types), "id_tipo_preco_maximo": [str(uuid.uuid4()) for _ in range(len(missing_types))]})
+
+        if not df_missing_types.empty:
+            sql.insert_with_copy(table_name="tipo_preco_maximo", data=df_missing_types.to_dict(orient="records"), conn=conn)
+
+        all_types = types_in_db + df_missing_types.to_dict(orient="records")
+        type_mapper = {x['nome']: x['id_tipo_preco_maximo'] for x in all_types}
+
+        return [type_mapper[t] for t in tipos_preco_maximo]
+
+    @with_database_connection
+    def _get_id_aliquota_imposto_and_add_missing(self, aliquotas_imposto: list[float], conn=None) -> list[str]:
+
+        types_in_db = sql.select("aliquota_imposto", filters=sql.filter("porcentagem_aliquota", aliquotas_imposto, "IN"), columns=["id_aliquota_imposto", "porcentagem_aliquota"], conn=conn)
+        missing_percentages = set(aliquotas_imposto) - set([x['porcentagem_aliquota'] for x in types_in_db])
+
+        df_missing_types = pd.DataFrame({"porcentagem_aliquota": list(missing_percentages), "id_aliquota_imposto": [str(uuid.uuid4()) for _ in range(len(missing_percentages))]})
+
+        if not df_missing_types.empty:
+            sql.insert_with_copy(table_name="aliquota_imposto", data=df_missing_types.to_dict(orient="records"), conn=conn)
+
+        all_types = types_in_db + df_missing_types.to_dict(orient="records")
+        type_mapper = {x['porcentagem_aliquota']: x['id_aliquota_imposto'] for x in all_types}
+
+        return [type_mapper[t] for t in aliquotas_imposto]
+
+    def _load_price_data(self, df_price_medicines: pd.DataFrame, conn=None):
+
+        sql.insert_with_copy("preco_maximo_apresentacao_medicamento", data=df_price_medicines.to_dict(orient="records"), conn=conn)
 
 if __name__ == "__main__":
     ETLMaxConsumerPrice().main()

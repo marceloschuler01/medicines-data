@@ -67,15 +67,18 @@ class ApiDatabase:
 
     @staticmethod
     @with_database_connection
-    def select(table_name: str, columns: list[str]=None, filters: list[Filter] | Filter | None = None, conn: PostgresConnection=None) -> list[tuple]:
+    def select(table_name: str, columns: list[str]=None, filters: list[Filter] | Filter | None = None, conn: PostgresConnection=None) -> list[dict]:
 
         params = {}
         sql_filters = ApiDatabase._parse_filters(filters=filters, params=params)
 
-        query = f"SELECT {','.join(columns) if columns else '*'} FROM {table_name} {sql_filters};"
+        columns = columns or ApiDatabase.get_columns(table_name=table_name, conn=conn)
+
+        query = f"SELECT {','.join(columns)} FROM {table_name} {sql_filters};"
         result = conn.execute_query(query, params=params, fetch=True)
 
-        return result
+        # Convert list of tuples to list of dicts
+        return [dict(zip(columns, row)) for row in result]
 
     @staticmethod
     @with_database_connection
