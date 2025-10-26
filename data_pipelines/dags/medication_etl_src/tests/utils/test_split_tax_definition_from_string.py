@@ -16,11 +16,17 @@ class TestSplitTaxDefinitionFromString(TestCase):
             self.assertEqual(split_tax_definition_from_string('PF 12 %')[0], 'PF')
             self.assertEqual(split_tax_definition_from_string('PF 12 %')[1], 12)
 
+            self.assertEqual(split_tax_definition_from_string('PMVG 12 %')[0], 'PMVG')
+            self.assertEqual(split_tax_definition_from_string('PMVG 12 %')[1], 12)
+
             self.assertEqual(split_tax_definition_from_string('PF 12 % ALC')[0], 'PF ALC')
             self.assertEqual(split_tax_definition_from_string('PF 12 % ALC')[1], 12)
 
             self.assertEqual(split_tax_definition_from_string('PMC 17,5 % ALC')[0], 'PMC ALC')
             self.assertEqual(split_tax_definition_from_string('PMC 17,5 % ALC')[1], 17.5)
+
+            self.assertEqual(split_tax_definition_from_string('PMVG 17,5 % ALC')[0], 'PMVG ALC')
+            self.assertEqual(split_tax_definition_from_string('PMVG 17,5 % ALC')[1], 17.5)
 
             self.assertEqual(split_tax_definition_from_string('PMC 23 %')[0], 'PMC')
             self.assertEqual(split_tax_definition_from_string('PMC 23 %')[1], 23)

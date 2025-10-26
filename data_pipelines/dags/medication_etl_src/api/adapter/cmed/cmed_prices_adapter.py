@@ -16,7 +16,7 @@ class CMEDPricesAdapter:
     def adapt(self, data: list[dict]) -> list[CmedPriceDefinition]:
 
         df = pd.DataFrame(data)
-        cols_pf_pmc = df.columns[df.columns.str.startswith(('PF', 'PMC'))]
+        cols_pf_pmc = df.columns[df.columns.str.startswith(('PF', 'PMC', 'PMVG'))]
 
         df['aliquotas_dict'] = df[cols_pf_pmc].apply(
             lambda row: {k: v for k, v in row.items() if pd.notna(v)},
