@@ -1,7 +1,3 @@
-import pandas as pd
-import requests
-from medication_etl_src.api.adapter.anvisa.anvisa_medicines_adapter import AnvisaMedicinesAdapter
-from stealth_requests import StealthSession
 import random
 import time
 import numpy as np
@@ -57,7 +53,7 @@ class ApiAnvisa:
         total_medicines = len(medicines)
         i = 0
 
-        with StealthSession() as session:
+        with StealthSessionWrapper() as session:
 
             while medicines:
 
@@ -100,7 +96,7 @@ class ApiAnvisa:
     @retry_decorator(retry_num=3, retry_sleep_sec=20)
     def get_regulation_category(self):
 
-        with StealthSession() as session:
+        with StealthSessionWrapper() as session:
 
             
             # First get the home page to make requests more stealthy
@@ -117,7 +113,7 @@ class ApiAnvisa:
     @retry_decorator(retry_num=3, retry_sleep_sec=20)
     def get_pharmaceutic_forms(self):
 
-        with StealthSession() as session:
+        with StealthSessionWrapper() as session:
 
             # First get the home page to make requests more stealthy
             session.get("https://consultas.anvisa.gov.br")
