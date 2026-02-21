@@ -1,5 +1,5 @@
 import pandas as pd
-from medication_etl_src.entity.anvisa_etities import MedicineAnvisa
+from medication_etl_src.entity.anvisa_entities import MedicineAnvisa
 import json
 
 
@@ -11,7 +11,7 @@ class MockApiAnvisa:
     BASE_URL = "https://consultas.anvisa.gov.br/api"
     MAX_RETRIES = 2
     ENDPOINT_MEDICAMENTOS = "/consulta/medicamento/produtos"
-    MOCKS_PATH = "C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/medication_etl_src/tests/mocks/"
+    MOCKS_PATH = "medication_etl_src/tests/mocks/"
 
     MEDICINES_WITH_ERROR = [145690, 22998,]
     NOTIFICATIONS_WITH_ERROR = [49756, 15841]

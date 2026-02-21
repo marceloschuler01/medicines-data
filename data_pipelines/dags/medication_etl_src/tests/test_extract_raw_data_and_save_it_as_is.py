@@ -8,7 +8,7 @@ import pandas as pd
 
 class TestExtractRawDataAndSaveItAsIs(unittest.TestCase):
 
-    path_to_save_temp_tests_files="C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/medication_etl_src/tests/_temp_files/"
+    path_to_save_temp_tests_files="medication_etl_src/tests/_temp_files/"
 
     @classmethod
     def setUpClass(cls):
