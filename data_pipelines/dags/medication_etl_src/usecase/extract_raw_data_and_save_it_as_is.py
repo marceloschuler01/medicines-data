@@ -1,22 +1,44 @@
-import sys
-import json
 import pandas as pd
 
 from medication_etl_src.api.api_anvisa import ApiAnvisa
 from medication_etl_src.api.api_cmed import ApiCMED
+from medication_etl_src.staging_db.staging_db import StagingDB
 
-PATH_TO_SAVE_DATA="C://Users/Marcelo/Desktop/Medicamentos/extracao-dados-medicamentos/data_pipelines/dags/temp_files/"
 
 class GetRawDataAndSaveItAsIs:
+    """Extract raw data from external APIs and persist it in the staging MongoDB.
 
-    def __init__(self, api=ApiAnvisa, api_cmed=ApiCMED, path_to_save_data=None):
+    Each data category is stored in its own collection.  Presentations are
+    fetched in configurable-sized batches and incrementally appended so that
+    a crash mid-way does not require re-fetching everything from scratch.
+    """
+
+    # Collections used as staging tables
+    COLLECTION_ACTIVE_MEDICINES = "active_medicines"
+    COLLECTION_INACTIVE_MEDICINES = "inactive_medicines"
+    COLLECTION_PRESENTATIONS_ACTIVE = "presentations_from_active_medicines"
+    COLLECTION_PRESENTATIONS_INACTIVE = "presentations_from_inactive_medicines"
+    COLLECTION_ERRORS_ACTIVE = "active_medicines_presentation_error"
+    COLLECTION_ERRORS_INACTIVE = "inactive_medicines_presentation_error"
+    COLLECTION_REGULATORY_CATEGORIES = "regulatory_categories"
+    COLLECTION_PHARMACEUTIC_FORMS = "pharmaceutic_forms"
+    COLLECTION_PRECO_MAX_CONSUMIDOR = "preco_maximo_consumidor"
+    COLLECTION_PRECO_MAX_GOVERNO = "preco_maximo_governo"
+
+    # Presentation index fields for query performance
+    _PRESENTATION_INDEX_FIELDS = ["codigoProduto", "codigoNotificacao", "tipoAutorizacao"]
+
+    def __init__(self, api=ApiAnvisa, api_cmed=ApiCMED, staging_db: StagingDB = None):
         self.api = api()
         self.api_cmed = api_cmed()
-        self.PATH_TO_SAVE_DATA = path_to_save_data or (sys.path[0] + '/')
+        self.staging_db = staging_db or StagingDB()
         self.PRESENTATIONS_PER_TIME_IN_GET_PRESENTATIONS: int = 800
 
-    def get_raw_data_and_save_it_as_is(self):
+    # ------------------------------------------------------------------
+    # Main orchestrator
+    # ------------------------------------------------------------------
 
+    def get_raw_data_and_save_it_as_is(self):
         self.extract_and_save_active_medicines_data()
         self.extract_and_save_inactive_medicines_data()
         self.extract_and_save_regulatory_category()
@@ -25,125 +47,167 @@ class GetRawDataAndSaveItAsIs:
         self.extract_and_save_presentations_from_inactive_medicines()
         self.extract_preco_maximo_consumidor_data()
 
-    def extract_and_save_active_medicines_data(self):
+    # ------------------------------------------------------------------
+    # Medicines
+    # ------------------------------------------------------------------
 
+    def extract_and_save_active_medicines_data(self):
         medicines_data = self.api.get_active_medicines()
-        self.save_json(data=medicines_data, filename="active_medicines.json")
+        self.staging_db.drop_collection(self.COLLECTION_ACTIVE_MEDICINES)
+        self.staging_db.insert(self.COLLECTION_ACTIVE_MEDICINES, medicines_data)
 
     def extract_and_save_inactive_medicines_data(self):
-
         medicines_data = self.api.get_inactive_medicines()
-        self.save_json(data=medicines_data, filename="inactive_medicines.json")
+        self.staging_db.drop_collection(self.COLLECTION_INACTIVE_MEDICINES)
+        self.staging_db.insert(self.COLLECTION_INACTIVE_MEDICINES, medicines_data)
+
+    # ------------------------------------------------------------------
+    # Presentations (batched / incremental)
+    # ------------------------------------------------------------------
 
     def extract_and_save_presentations(self):
-
-        self.extract_and_save_presentations_from_medicines(medicines_table='active_medicines')
+        self.extract_and_save_presentations_from_medicines(
+            medicines_collection=self.COLLECTION_ACTIVE_MEDICINES,
+            presentations_collection=self.COLLECTION_PRESENTATIONS_ACTIVE,
+            errors_collection=self.COLLECTION_ERRORS_ACTIVE,
+        )
 
     def extract_and_save_presentations_from_inactive_medicines(self):
+        self.extract_and_save_presentations_from_medicines(
+            medicines_collection=self.COLLECTION_INACTIVE_MEDICINES,
+            presentations_collection=self.COLLECTION_PRESENTATIONS_INACTIVE,
+            errors_collection=self.COLLECTION_ERRORS_INACTIVE,
+        )
 
-        self.extract_and_save_presentations_from_medicines(medicines_table='inactive_medicines')
+    def extract_and_save_presentations_from_medicines(
+        self,
+        medicines_collection: str,
+        presentations_collection: str,
+        errors_collection: str,
+    ):
+        """Incrementally fetch and store presentations for all medicines.
 
-    def extract_preco_maximo_consumidor_data(self):
+        Already-persisted presentations and errors are read back from MongoDB
+        to determine which medicine codes still need fetching.  Only the newly
+        fetched batch is appended — no full-collection rewrite.
+        """
 
-        data = self.api_cmed.get_preco_maximo_consumidor()
-        self.save_json(data=data.to_dict(orient="records"), filename="preco_maximo_consumidor.json")
+        # 1. Read the medicines list from the staging DB
+        raw_medicines = self.staging_db.select(medicines_collection)
+        medicines = pd.DataFrame([
+            {
+                "codigo": m["produto"]["codigo"],
+                "codigoNotificacao": m["produto"]["codigoNotificacao"],
+                "tipoAutorizacao": m["produto"]["tipoAutorizacao"],
+            }
+            for m in raw_medicines
+        ])
 
-    def extract_preco_maximo_governo_data(self):
+        registered = medicines[medicines["tipoAutorizacao"] != "NOTIFICADO"]
+        notified = medicines[medicines["tipoAutorizacao"] == "NOTIFICADO"]
 
-        data = self.api_cmed.get_preco_maximo_governo()
-        self.save_json(data=data.to_dict(orient="records"), filename="preco_maximo_governo.json")
-    
-    def extract_and_save_presentations_from_medicines(self, medicines_table: str):
+        # 2. Determine which codes have already been saved (presentations + errors)
+        already_saved_presentations = self.staging_db.select(presentations_collection)
+        already_saved_errors = self.staging_db.select(errors_collection)
 
-        with open(self.PATH_TO_SAVE_DATA+self.get_current_date_as_str()+medicines_table+'.json', 'r', encoding="utf8") as f:
-            medicines = json.load(f)
-            medicines = [{'codigo': m['produto']['codigo'], 'codigoNotificacao': m['produto']['codigoNotificacao'], 'tipoAutorizacao': m['produto']['tipoAutorizacao']} for m in medicines]
-            medicines = pd.DataFrame(medicines)
+        # Build a unified view for deduplication
+        already_saved_data = []
+        for item in already_saved_presentations:
+            already_saved_data.append(item)
+        for item in already_saved_errors:
+            entry = dict(item)
+            if "codigoProduto" not in entry:
+                entry["codigoProduto"] = entry.get("codigo")
+            already_saved_data.append(entry)
 
-        registered_medicines = medicines[medicines['tipoAutorizacao'] != "NOTIFICADO"]
-        notificated_medicines = medicines[medicines['tipoAutorizacao'] == "NOTIFICADO"]
+        saved_registered_codes = {
+            m["codigoProduto"]
+            for m in already_saved_data
+            if m.get("tipoAutorizacao") != "NOTIFICADO"
+        }
+        saved_notification_codes = {
+            m["codigoNotificacao"]
+            for m in already_saved_data
+            if m.get("tipoAutorizacao") == "NOTIFICADO"
+        }
 
-        try:
-            with open(self.PATH_TO_SAVE_DATA+self.get_current_date_as_str()+'presentations_from_'+medicines_table+'.json', 'r', encoding="utf8") as f:
-                alredy_saved_medicines = json.load(f)
-        except FileNotFoundError:
-            alredy_saved_medicines = []
+        # 3. Filter out already-fetched medicines
+        remaining_registered = registered[~registered["codigo"].isin(saved_registered_codes)].to_dict(orient="records")
+        remaining_notified = notified[~notified["codigoNotificacao"].isin(saved_notification_codes)].to_dict(orient="records")
+        remaining_medicines = remaining_registered + remaining_notified
 
+        print(len(remaining_medicines), " medicines to be read")
 
-        try:
-            with open(self.PATH_TO_SAVE_DATA+self.get_current_date_as_str()+medicines_table+'_presentation_error.json', 'r', encoding="utf8") as f:
-                alredy_saved_errors= json.load(f)
-        except FileNotFoundError:
-            alredy_saved_errors = []
+        if not remaining_medicines:
+            return "Finalizado"
 
-        for item in alredy_saved_errors:
-            if 'codigoProduto' not in item:
-                item['codigoProduto'] = item['codigo']
-        alredy_saved_data = alredy_saved_medicines + alredy_saved_errors
+        # 4. Take only the next batch
+        batch_size = self.PRESENTATIONS_PER_TIME_IN_GET_PRESENTATIONS
+        to_be_saved_after = len(remaining_medicines) - batch_size
+        batch = remaining_medicines[:batch_size]
 
-        already_saved_registered_medicines = [m for m in alredy_saved_data if m['tipoAutorizacao'] != "NOTIFICADO"]
-        already_saved_notificated_medicines = [m for m in alredy_saved_data if m['tipoAutorizacao'] == "NOTIFICADO"]
-        already_readed_registered_codes = set([m['codigoProduto'] for m in already_saved_registered_medicines])
-        already_readed_notification_codes = set([m['codigoNotificacao'] for m in already_saved_notificated_medicines])
+        # 5. Fetch presentations from the API
+        presentations, errors = self.api.get_presentations(medicines=batch)
 
-        for item in alredy_saved_errors:
-            if 'codigoProduto' in item:
-                del item['codigoProduto']
-
-        registered_medicines: pd.DataFrame = registered_medicines[~registered_medicines['codigo'].isin(already_readed_registered_codes)]
-        registered_medicines: list[dict] = registered_medicines.to_dict(orient="records")
-
-        notificated_medicines: pd.DataFrame = notificated_medicines[~notificated_medicines['codigoNotificacao'].isin(already_readed_notification_codes)]
-        notificated_medicines: list[dict] = notificated_medicines.to_dict(orient="records")
-
-        medicines = registered_medicines + notificated_medicines
-
-        medicines_per_time: int = self.PRESENTATIONS_PER_TIME_IN_GET_PRESENTATIONS
-
-        print(len(medicines), " medicines to be readed")
-        to_be_saved_after = len(medicines) - medicines_per_time
-
-        medicines = medicines[:medicines_per_time] if len(medicines) > medicines_per_time else medicines
-
-        presentations, errors = self.api.get_presentations(medicines=medicines)
+        # 6. Append only the new data (no full rewrite)
         if presentations:
-            self.save_json(data=alredy_saved_medicines+presentations, filename='presentations_from_'+medicines_table+'.json')
-        self.save_json(data=alredy_saved_errors+errors, filename=medicines_table+'_presentation_error.json')
+            self.staging_db.insert(presentations_collection, presentations)
 
-        # del variables before call recursive function
-        del medicines
-        del presentations
-        del alredy_saved_data
-        del alredy_saved_errors
-        del alredy_saved_medicines
-        del already_readed_registered_codes
-        del already_readed_notification_codes
-        del registered_medicines
-        del notificated_medicines
-        del errors
+        if errors:
+            error_docs = [
+                {
+                    "codigo": err["codigo"],
+                    "codigoNotificacao": err["codigoNotificacao"],
+                    "tipoAutorizacao": err["tipoAutorizacao"],
+                }
+                for err in errors
+            ]
+            self.staging_db.insert(errors_collection, error_docs)
+
+        # 7. Free memory and recurse if there are remaining medicines
+        del remaining_medicines, presentations, errors, batch
 
         if to_be_saved_after > 0:
-            return self.extract_and_save_presentations_from_medicines(medicines_table=medicines_table)
+            return self.extract_and_save_presentations_from_medicines(
+                medicines_collection=medicines_collection,
+                presentations_collection=presentations_collection,
+                errors_collection=errors_collection,
+            )
+
+        # Create indexes on presentations for downstream ETL performance
+        self.staging_db.ensure_indexes(presentations_collection, self._PRESENTATION_INDEX_FIELDS)
+
         return "Finalizado"
 
+    # ------------------------------------------------------------------
+    # Regulatory categories & pharmaceutical forms
+    # ------------------------------------------------------------------
 
     def extract_and_save_regulatory_category(self):
-
         categories = self.api.get_regulation_category()
-        self.save_json(data=categories, filename="regulatory_categories.json")
+        self.staging_db.drop_collection(self.COLLECTION_REGULATORY_CATEGORIES)
+        self.staging_db.insert(self.COLLECTION_REGULATORY_CATEGORIES, categories)
 
     def extract_and_save_pharmaceutic_forms(self):
+        forms = self.api.get_pharmaceutic_forms()
+        self.staging_db.drop_collection(self.COLLECTION_PHARMACEUTIC_FORMS)
+        self.staging_db.insert(self.COLLECTION_PHARMACEUTIC_FORMS, forms)
 
-        categories = self.api.get_pharmaceutic_forms()
-        self.save_json(data=categories, filename="pharmaceutic_forms.json")
+    # ------------------------------------------------------------------
+    # CMED prices
+    # ------------------------------------------------------------------
 
-    def save_json(self, data: list[dict] | dict, filename: str):
+    def extract_preco_maximo_consumidor_data(self):
+        data = self.api_cmed.get_preco_maximo_consumidor()
+        self.staging_db.drop_collection(self.COLLECTION_PRECO_MAX_CONSUMIDOR)
+        self.staging_db.insert(self.COLLECTION_PRECO_MAX_CONSUMIDOR, data.to_dict(orient="records"))
 
-        file_path = self.PATH_TO_SAVE_DATA+self.get_current_date_as_str()+filename
-        with open(file_path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
+    def extract_preco_maximo_governo_data(self):
+        data = self.api_cmed.get_preco_maximo_governo()
+        self.staging_db.drop_collection(self.COLLECTION_PRECO_MAX_GOVERNO)
+        self.staging_db.insert(self.COLLECTION_PRECO_MAX_GOVERNO, data.to_dict(orient="records"))
 
-    def get_current_date_as_str(self) -> str:
 
-        #return datetime.date.today().strftime("%Y-%m-%d")
-        return "2025-05-10"
+if __name__ == "__main__":
+    uc = GetRawDataAndSaveItAsIs()
+    uc.get_raw_data_and_save_it_as_is()
