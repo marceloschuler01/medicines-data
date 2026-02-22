@@ -1,70 +1,148 @@
 from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python import PythonOperator
 from datetime import datetime
-import psycopg2
-import pandas as pd
-from sqlalchemy import create_engine
-from medication_etl_src.usecase.get_medicines_info_and_store_as_csv import GetMedicinesInfoAndStoreAsCsv
 
 
-def extract_and_transform():
+# ---------------------------------------------------------------------------
+# Task callables
+# Each function creates its own dependencies so that Airflow workers
+# (which may run in separate processes) get fresh connections every time.
+# ---------------------------------------------------------------------------
 
-    GetMedicinesInfoAndStoreAsCsv().get_medicines_info_and_store_as_csv()
+def _extract_medicines_data():
+    """Step 1 – Extract medicines from Anvisa API and save to MongoDB."""
+    from medication_etl_src.usecase.extract_raw_data_and_save_it_as_is import GetRawDataAndSaveItAsIs
 
-def load_to_database():
+    uc = GetRawDataAndSaveItAsIs()
+    uc.extract_and_save_active_medicines_data()
+    uc.extract_and_save_inactive_medicines_data()
+    uc.extract_and_save_regulatory_category()
+    uc.extract_and_save_pharmaceutic_forms()
 
-    df = pd.read_csv("/opt/airflow/dags/csvs/TEMP.csv")
 
-    print("È o novo")
+def _extract_presentations_data():
+    """Step 2 – Extract presentations from Anvisa API and save to MongoDB."""
+    from medication_etl_src.usecase.extract_raw_data_and_save_it_as_is import GetRawDataAndSaveItAsIs
 
-    print("coniectandoo postgres")
+    uc = GetRawDataAndSaveItAsIs()
+    uc.extract_and_save_presentations()
+    uc.extract_and_save_presentations_from_inactive_medicines()
 
-    # Connect to PostgreSQL
-    '''conn = psycopg2.connect(
-        host="postgres-container",  # Use container name here
-        database="staging-db",
-        user="root",
-        password="1234"
-    )'''
-    #cur = conn.cursor()
 
-    engine = create_engine('postgresql+psycopg2://root:1234@postgres-container/staging-db?client_encoding=utf8')
+def _extract_cmed_data():
+    """Step 3 – Extract CMED price data and save to MongoDB."""
+    from medication_etl_src.usecase.extract_raw_data_and_save_it_as_is import GetRawDataAndSaveItAsIs
 
-    df.to_sql(name="medicamentos", con=engine, if_exists="replace", index=False)
+    uc = GetRawDataAndSaveItAsIs()
+    uc.extract_preco_maximo_consumidor_data()
+    uc.extract_preco_maximo_governo_data()
 
-    #conn.commit()
-    #cur.close()
-    #conn.close()
 
-    engine.dispose()
+def _run_migrations():
+    """Ensure PostgreSQL schema is up-to-date before any load task."""
+    from medication_etl_src.run_migrations import run_migrations
 
-    print("FInalizado Integração 2!")
+    run_migrations()
 
-# Default arguments for the DAG
+
+def _transform_and_load_medicines():
+    """Step 4 – Transform medicines from MongoDB and load into PostgreSQL."""
+    from medication_etl_src.usecase.extract_transform_and_load_from_staging_db_to_medicines_db import (
+        ExtractTransformAndLoadFromStagingDBToMedicinesDB,
+    )
+
+    ExtractTransformAndLoadFromStagingDBToMedicinesDB().main()
+
+
+def _transform_and_load_presentations():
+    """Step 5 – Transform presentations from MongoDB and load into PostgreSQL."""
+    from medication_etl_src.usecase.etl_apresentacoes import ExtractTransformAndLoadApresentacoes
+
+    ExtractTransformAndLoadApresentacoes().main()
+
+
+def _transform_and_load_cmed():
+    """Step 6 – Transform CMED prices from MongoDB and load into PostgreSQL."""
+    from medication_etl_src.usecase.etl_max_consumer_price import ETLMaxConsumerPrice
+
+    ETLMaxConsumerPrice().main()
+
+
+# ---------------------------------------------------------------------------
+# DAG definition
+# ---------------------------------------------------------------------------
+
 default_args = {
-    'owner': 'airflow',
-    'start_date': datetime(2023, 10, 19),  # Replace with the current date
-    'retries': 1,
+    "owner": "airflow",
+    "start_date": datetime(2025, 1, 1),
+    "retries": 1,
 }
 
-# Create the DAG
 with DAG(
-    dag_id='medicine-data-etl-dag',
+    dag_id="medicine-data-etl-dag",
     default_args=default_args,
-    schedule_interval='@daily',  # Set the schedule interval (here: daily)
-    catchup=False
+    schedule_interval="@monthly",
+    catchup=False,
+    description="ETL pipeline: Anvisa + CMED → MongoDB (staging) → PostgreSQL",
+    tags=["medicines", "etl"],
 ) as dag:
-    
-    # Define the task using PythonOperator
-    task_extract_and_transform = PythonOperator(
-        task_id='extract_and_transform',
-        python_callable=extract_and_transform
+
+    # -- Extraction tasks (Anvisa API / CMED → MongoDB) --------------------
+
+    extract_medicines = PythonOperator(
+        task_id="extract_medicines_data",
+        python_callable=_extract_medicines_data,
     )
 
-    # Define the task using PythonOperator
-    task_load_to_database = PythonOperator(
-        task_id='load_to_database',
-        python_callable=load_to_database
+    extract_presentations = PythonOperator(
+        task_id="extract_presentations_data",
+        python_callable=_extract_presentations_data,
     )
 
-    task_extract_and_transform >> task_load_to_database
+    extract_cmed = PythonOperator(
+        task_id="extract_cmed_data",
+        python_callable=_extract_cmed_data,
+    )
+
+    # -- Schema migration (PostgreSQL) -------------------------------------
+
+    run_migrations = PythonOperator(
+        task_id="run_migrations",
+        python_callable=_run_migrations,
+    )
+
+    # -- Transform & Load tasks (MongoDB → PostgreSQL) ---------------------
+
+    transform_load_medicines = PythonOperator(
+        task_id="transform_and_load_medicines",
+        python_callable=_transform_and_load_medicines,
+    )
+
+    transform_load_presentations = PythonOperator(
+        task_id="transform_and_load_presentations",
+        python_callable=_transform_and_load_presentations,
+    )
+
+    transform_load_cmed = PythonOperator(
+        task_id="transform_and_load_cmed",
+        python_callable=_transform_and_load_cmed,
+    )
+
+    # -- Task dependencies (matching the pipeline diagram) -----------------
+    #
+    #  extract_medicines  ──►  extract_presentations  ──►  extract_cmed
+    #                                                           │
+    #                          run_migrations  ─────────────────┤
+    #                                                           ▼
+    #                                               transform_load_medicines
+    #                                                           │
+    #                                                           ▼
+    #                                             transform_load_presentations
+    #                                                           │
+    #                                                           ▼
+    #                                                transform_load_cmed
+
+    extract_medicines >> extract_presentations >> extract_cmed
+    [extract_cmed, run_migrations] >> transform_load_medicines
+    transform_load_medicines >> transform_load_presentations
+    transform_load_presentations >> transform_load_cmed

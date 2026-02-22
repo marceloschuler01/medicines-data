@@ -7,8 +7,12 @@ ENV AIRFLOW__CORE__LOAD_EXAMPLES=False
 ENV AIRFLOW__CORE__EXECUTOR=SequentialExecutor
 
 RUN python -m pip install --upgrade pip
-RUN pip install pandas
-RUN pip install psycopg2-binary
+RUN pip install pandas==2.2.3
+RUN pip install psycopg2-binary==2.9.10
+RUN pip install xlrd==2.0.1
+RUN pip install blinker==1.7.0
+RUN pip install stealth_requests==1.2.1
+RUN pip install pymongo==4.16.0
 
 # Copy DAGs into the Airflow DAGs folder
 COPY --chown=airflow ./dags /opt/airflow/dags
