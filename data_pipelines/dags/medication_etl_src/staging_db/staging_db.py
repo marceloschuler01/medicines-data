@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Optional
 
-from pymongo import ASCENDING, InsertOne
+from pymongo import ASCENDING
 from pymongo.database import Database
 
 from medication_etl_src.staging_db.mongo_connector import get_mongo_database
@@ -98,6 +98,25 @@ class StagingDB:
     # ------------------------------------------------------------------
     # Index helpers
     # ------------------------------------------------------------------
+
+    def distinct(self, collection_name: str, field: str, query: dict | None = None) -> list:
+        """Return distinct values for *field* in *collection_name*.
+
+        This is far more memory-efficient than :meth:`select` when only a
+        single key is needed for deduplication (e.g. checking which medicine
+        codes already have presentations stored).
+
+        Parameters
+        ----------
+        collection_name: str
+            The collection to query.
+        field : str
+            The document field whose distinct values are requested.
+        query : dict, optional
+            An optional filter to narrow the set of documents considered.
+        """
+        collection = self._db[collection_name]
+        return collection.distinct(field, query or {})
 
     def ensure_indexes(self, collection_name: str, index_fields: list[str]) -> None:
         """Create ascending indexes on *index_fields* for *collection_name*.

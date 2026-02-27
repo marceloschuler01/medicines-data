@@ -87,9 +87,9 @@ class GetRawDataAndSaveItAsIs:
     ):
         """Incrementally fetch and store presentations for all medicines.
 
-        Already-persisted presentations and errors are read back from MongoDB
-        to determine which medicine codes still need fetching.  Only the newly
-        fetched batch is appended — no full-collection rewrite.
+        Uses MongoDB ``distinct`` queries to determine which medicine codes
+        still need fetching — avoiding loading full documents into memory.
+        Only the newly fetched batch is appended — no full-collection rewrite.
         """
 
         # 1. Read the medicines list from the staging DB
@@ -106,30 +106,21 @@ class GetRawDataAndSaveItAsIs:
         registered = medicines[medicines["tipoAutorizacao"] != "NOTIFICADO"]
         notified = medicines[medicines["tipoAutorizacao"] == "NOTIFICADO"]
 
-        # 2. Determine which codes have already been saved (presentations + errors)
-        already_saved_presentations = self.staging_db.select(presentations_collection)
-        already_saved_errors = self.staging_db.select(errors_collection)
+        # 2. Use distinct queries to get only the keys already saved (low memory)
+        not_notified_filter = {"tipoAutorizacao": {"$ne": "NOTIFICADO"}}
+        notified_filter = {"tipoAutorizacao": "NOTIFICADO"}
 
-        # Build a unified view for deduplication
-        already_saved_data = []
-        for item in already_saved_presentations:
-            already_saved_data.append(item)
-        for item in already_saved_errors:
-            entry = dict(item)
-            if "codigoProduto" not in entry:
-                entry["codigoProduto"] = entry.get("codigo")
-            already_saved_data.append(entry)
+        saved_registered_codes = set(
+            self.staging_db.distinct(presentations_collection, "codigoProduto", not_notified_filter)
+        ) | set(
+            self.staging_db.distinct(errors_collection, "codigo", not_notified_filter)
+        )
 
-        saved_registered_codes = {
-            m["codigoProduto"]
-            for m in already_saved_data
-            if m.get("tipoAutorizacao") != "NOTIFICADO"
-        }
-        saved_notification_codes = {
-            m["codigoNotificacao"]
-            for m in already_saved_data
-            if m.get("tipoAutorizacao") == "NOTIFICADO"
-        }
+        saved_notification_codes = set(
+            self.staging_db.distinct(presentations_collection, "codigoNotificacao", notified_filter)
+        ) | set(
+            self.staging_db.distinct(errors_collection, "codigoNotificacao", notified_filter)
+        )
 
         # 3. Filter out already-fetched medicines
         remaining_registered = registered[~registered["codigo"].isin(saved_registered_codes)].to_dict(orient="records")
@@ -139,6 +130,7 @@ class GetRawDataAndSaveItAsIs:
         print(len(remaining_medicines), " medicines to be read")
 
         if not remaining_medicines:
+            self.staging_db.ensure_indexes(presentations_collection, self._PRESENTATION_INDEX_FIELDS)
             return "Finalizado"
 
         # 4. Take only the next batch
