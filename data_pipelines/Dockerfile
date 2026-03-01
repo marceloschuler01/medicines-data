@@ -13,6 +13,7 @@ RUN pip install xlrd==2.0.1
 RUN pip install blinker==1.7.0
 RUN pip install stealth_requests==1.2.1
 RUN pip install pymongo==4.16.0
+RUN pip install openpyxl==3.1.5
 
 # Copy DAGs into the Airflow DAGs folder
 COPY --chown=airflow ./dags /opt/airflow/dags
