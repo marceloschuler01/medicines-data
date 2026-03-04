@@ -3,8 +3,8 @@ import sys
 from medication_etl_src.database.api_database import ApiDatabase as sql
 from medication_etl_src.database.db_connector import with_database_connection
 
-# Path to the migrations folder
-migrations_folder = './medication_etl_src/migrations'
+# Path to the migrations folder (relative to *this* file, not the CWD)
+migrations_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'migrations')
 
 @with_database_connection
 def run_migrations(conn=None, migration_name=None):
@@ -36,6 +36,7 @@ def run_migrations(conn=None, migration_name=None):
 
     except Exception as e:
         print(f"Error running migrations: {e}")
+        raise e
 
 
 if __name__ == '__main__':
