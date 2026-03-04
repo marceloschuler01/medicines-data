@@ -15,6 +15,7 @@ class ApiAnvisa:
     BASE_URL = "https://consultas.anvisa.gov.br/api"
     MAX_RETRIES = 2
     ENDPOINT_MEDICAMENTOS = "/consulta/medicamento/produtos"
+    PAGE_SIZE_MEDICINES = 250
 
     def __init__(self):
         self._times_to_retry: int=self.MAX_RETRIES
@@ -22,12 +23,12 @@ class ApiAnvisa:
     @retry_decorator(retry_num=3, retry_sleep_sec=20)
     def get_active_medicines(self) -> list[dict]:
 
-        self._times_to_retry = 0
+        self._times_to_retry = 3
 
         active_medicines: list[dict] = self._make_request_with_pagination_with_new_session(
             endpoint=self.ENDPOINT_MEDICAMENTOS,
             params={"filter[situacaoRegistro]": "V"},
-            count_by_page=1200,
+            count_by_page=self.PAGE_SIZE_MEDICINES,
         )
 
         return active_medicines
@@ -35,12 +36,12 @@ class ApiAnvisa:
     @retry_decorator(retry_num=3, retry_sleep_sec=20)
     def get_inactive_medicines(self):
 
-        self._times_to_retry = 0
+        self._times_to_retry = 3
 
         not_active_medicines: list[dict] = self._make_request_with_pagination_with_new_session(
             endpoint="/consulta/medicamento/produtos",
             params={"filter[situacaoRegistro]": "C"},
-            count_by_page=1200,
+            count_by_page=self.PAGE_SIZE_MEDICINES,
         )
 
         return not_active_medicines
@@ -83,7 +84,7 @@ class ApiAnvisa:
                     print(traceback.format_exc())
                     if self._times_to_retry > 0:
                         self._times_to_retry -= 1
-                        
+
                         time.sleep(self._get_random_number(1, 3, 2))
                         r, e = self.get_presentations(medicines=medicines+[medicine])
                         return result + r, errors + e
@@ -98,7 +99,7 @@ class ApiAnvisa:
 
         with StealthSessionWrapper() as session:
 
-            
+
             # First get the home page to make requests more stealthy
             session.get("https://consultas.anvisa.gov.br")
             time.sleep(self._get_random_number(1, 3, 2))
@@ -127,7 +128,7 @@ class ApiAnvisa:
         return pharmaceutic_forms
 
     def _make_request_with_pagination_with_new_session(self, endpoint: str, count_by_page: int, headers: str | None=None, params: dict | None=None, n_page=0, total_pages=1) -> list[dict]:
-        
+
         with StealthSessionWrapper() as session:
 
             result = self._make_request_with_pagination(endpoint=endpoint, count_by_page=count_by_page, headers=headers, params=params, n_page=n_page, total_pages=total_pages, session=session)
@@ -135,12 +136,12 @@ class ApiAnvisa:
         return result
 
     def _make_request_with_pagination(self, session: StealthSessionWrapper, endpoint: str, count_by_page: int, headers: str | None=None, params: dict | None=None, n_page=0, total_pages=1) -> list[dict]:
-        
+
         time.sleep(random.random())
 
         if params is None:
             params = {}
-        
+
         params["count"] = count_by_page
 
         result = []
@@ -149,7 +150,7 @@ class ApiAnvisa:
             print("page: ", n_page, " of ", total_pages)
             n_page += 1
             params["page"] = n_page
-            sleep_time = self._get_random_number(0.3, 1.2, 0.6)
+            sleep_time = self._get_random_number(0.6, 2.4, 1.2)
             print("Sleeping ", sleep_time, "seconds")
             time.sleep(sleep_time)
             res = self._make_request(session=session, endpoint=endpoint, headers=headers, params=params)
@@ -165,7 +166,7 @@ class ApiAnvisa:
 
         if n_page < total_pages:
             return result + self._make_request_with_pagination(session=session, endpoint=endpoint, count_by_page=count_by_page, headers=headers, params=params, n_page=n_page, total_pages=total_pages)
-    
+
         return result
 
     def _make_request(self, session, endpoint, headers: str | None=None, params: dict | None=None, allow_retries=True) -> dict:
@@ -210,7 +211,7 @@ class ApiAnvisa:
         res_json = res.json()
 
         return res_json
-    
+
     def _default_headers(self):
         return {"Authorization": "Guest"}
 
@@ -225,5 +226,3 @@ class ApiAnvisa:
             size=1
         )
         return numbers[0]
-
-
