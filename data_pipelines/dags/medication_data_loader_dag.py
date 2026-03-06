@@ -63,9 +63,9 @@ def _transform_and_load_presentations():
 
 def _transform_and_load_cmed():
     """Step 6 – Transform CMED prices from MongoDB and load into PostgreSQL."""
-    from medication_etl_src.usecase.etl_max_consumer_price import ETLMaxConsumerPrice
+    from medication_etl_src.usecase.etl_max_price import ETLMaxPrice
 
-    ETLMaxConsumerPrice().main()
+    ETLMaxPrice().main()
 
 
 # ---------------------------------------------------------------------------

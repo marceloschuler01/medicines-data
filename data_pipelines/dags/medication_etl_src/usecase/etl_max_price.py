@@ -11,7 +11,7 @@ from medication_etl_src.staging_db.staging_db import StagingDB
 from medication_etl_src.utils.split_tax_definition_from_string import split_tax_definition_from_string
 
 
-class ETLMaxConsumerPrice:
+class ETLMaxPrice:
 
     def __init__(self, staging_db=StagingDB()):
         self.staging_db = staging_db
@@ -170,4 +170,4 @@ class ETLMaxConsumerPrice:
         sql.insert_with_copy("preco_maximo_apresentacao_medicamento", data=df_price_medicines.to_dict(orient="records"), conn=conn)
 
 if __name__ == "__main__":
-    ETLMaxConsumerPrice().main()
+    ETLMaxPrice().main()
