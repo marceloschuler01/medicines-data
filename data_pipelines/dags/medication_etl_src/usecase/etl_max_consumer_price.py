@@ -34,7 +34,7 @@ class ETLMaxConsumerPrice:
 
             print(f"Processing presentations max government price. Page:",
                   page, "with", len(data), "itens")
-            self._extract_transform_and_load(data=data, conn=conn)
+            self._extract_transform_and_load(data=data, only_pmvg=True, conn=conn)
 
             page += 1
 
@@ -67,7 +67,7 @@ class ETLMaxConsumerPrice:
         return data
 
     @with_database_connection
-    def _extract_transform_and_load(self, data: list[dict], only_pmvg=True, conn=None):
+    def _extract_transform_and_load(self, data: list[dict], only_pmvg=False, conn=None):
 
         data: list[CmedPriceDefinition] = CMEDPricesAdapter().adapt(data)
 
