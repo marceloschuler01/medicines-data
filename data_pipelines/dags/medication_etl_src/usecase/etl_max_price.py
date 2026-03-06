@@ -19,10 +19,11 @@ class ETLMaxPrice:
     @with_database_connection
     def main(self, conn=None):
 
-        self.max_consumer_price_etl(conn=conn)
-        self.max_government_price_etl(conn=conn)
+        self._delete_old_price_data(conn=conn)
+        self._max_consumer_price_etl(conn=conn)
+        self._max_government_price_etl(conn=conn)
 
-    def max_government_price_etl(self, conn=None):
+    def _max_government_price_etl(self, conn=None):
 
         page = 1
 
@@ -34,11 +35,11 @@ class ETLMaxPrice:
 
             print(f"Processing presentations max government price. Page:",
                   page, "with", len(data), "itens")
-            self._extract_transform_and_load(data=data, only_pmvg=True, conn=conn)
+            self._extract_transform_and_load(data=data, pmvg=True, conn=conn)
 
             page += 1
 
-    def max_consumer_price_etl(self, conn=None):
+    def _max_consumer_price_etl(self, conn=None):
 
         page = 1
 
@@ -50,7 +51,7 @@ class ETLMaxPrice:
 
             print(f"Processing presentations max consumer price. Page:",
                   page, "with", len(data), "itens")
-            self._extract_transform_and_load(data=data, conn=conn)
+            self._extract_transform_and_load(data=data, pmvg=False, conn=conn)
 
             page += 1
 
@@ -65,9 +66,14 @@ class ETLMaxPrice:
         data = self.staging_db.select("preco_maximo_governo", page=page)
 
         return data
+    
+    @with_database_connection
+    def _delete_old_price_data(self, conn=None):
+
+        sql.delete("preco_maximo_apresentacao_medicamento", conn=conn)
 
     @with_database_connection
-    def _extract_transform_and_load(self, data: list[dict], only_pmvg=False, conn=None):
+    def _extract_transform_and_load(self, data: list[dict], pmvg=False, conn=None):
 
         data: list[CmedPriceDefinition] = CMEDPricesAdapter().adapt(data)
 
@@ -80,9 +86,11 @@ class ETLMaxPrice:
 
         df_price_medicines = self._transform_price_data(df_price_data=df_price_data)
 
-        if only_pmvg:
+        if pmvg:
             # Ignore other types of price definitions
             df_price_medicines = df_price_medicines[df_price_medicines['tipo_aliquota'].str.upper().str.contains('PMVG', na=False)]
+        else:
+            df_price_medicines = df_price_medicines[~df_price_medicines['tipo_aliquota'].str.upper().str.contains('PMVG', na=False)]
 
         df_price_medicines['id_tipo_preco_maximo'] = self._get_id_tipo_preco_maximo_and_add_missing(df_price_medicines["tipo_aliquota"].tolist(), conn=conn)
         df_price_medicines['id_aliquota_imposto'] = self._get_id_aliquota_imposto_and_add_missing(df_price_medicines["porcentagem_aliquota"].tolist(), conn=conn)
