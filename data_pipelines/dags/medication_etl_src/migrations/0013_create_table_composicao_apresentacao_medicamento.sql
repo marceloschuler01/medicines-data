@@ -8,5 +8,5 @@ CREATE TABLE IF NOT EXISTS composicao_apresentacao_medicamento
  CONSTRAINT FK_6 FOREIGN KEY ( id_principio_ativo ) REFERENCES principio_ativo ( id_principio_ativo ),
  CONSTRAINT FK_7 FOREIGN KEY ( id_apresentacao_medicamento ) REFERENCES apresentacao_medicamento ( id_apresentacao_medicamento ) ON DELETE CASCADE
 );
-
+CREATE INDEX IF NOT EXISTS idx_composicao_apresentacao_id_apresentacao ON composicao_apresentacao_medicamento ( id_apresentacao_medicamento );
 

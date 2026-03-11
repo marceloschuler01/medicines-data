@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS fabricantes_internacionais_apresentacao_medicamento
  CONSTRAINT FK_15_1 FOREIGN KEY ( id_apresentacao_medicamento ) REFERENCES apresentacao_medicamento ( id_apresentacao_medicamento ) ON DELETE CASCADE,
  CONSTRAINT FK_16 FOREIGN KEY ( id_fabricante_internacional ) REFERENCES fabricante_internacional ( id_fabricante_internacional )  ON DELETE CASCADE
 );
-
+CREATE INDEX IF NOT EXISTS idx_fabricantes_internacionais_apresentacao_id_apresentacao ON fabricantes_internacionais_apresentacao_medicamento ( id_apresentacao_medicamento );
 

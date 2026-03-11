@@ -22,3 +22,7 @@ CREATE TABLE IF NOT EXISTS medicamento
 );
 CREATE INDEX IF NOT EXISTS idx_id_medicamento_referencia ON medicamento ( id_medicamento_referencia )
 ;
+CREATE INDEX IF NOT EXISTS idx_id_categoria_regulatoria ON medicamento ( id_categoria_regulatoria )
+;
+CREATE INDEX IF NOT EXISTS idx_id_empresa ON medicamento ( id_empresa )
+;
