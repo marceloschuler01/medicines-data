@@ -34,6 +34,7 @@ class ExtractTransformAndLoadApresentacoes:
     def _delete_all_old_presentations_data(self, conn=None) -> None:
 
         print("Deleting all old presentations data...")
+        sql.delete(table_name="embalagem_apresentacao_medicamento", conn=conn)
         sql.delete(table_name="forma_farmaceutica_apresentacao_medicamento", conn=conn)
         sql.delete(table_name="forma_farmaceutica", conn=conn)
         sql.delete(table_name="classe_terapeutica_medicamento", conn=conn)
@@ -94,6 +95,7 @@ class ExtractTransformAndLoadApresentacoes:
 
             LoadPresentationsToDB().main(df_presentations=df_presentations, conn=conn)
             self._extract_pharmaceutic_forms_and_load(presentations=df_presentations, conn=conn)
+            self._extract_packaging_and_load(presentations=df_presentations, conn=conn)
 
             df_presentations = self._extract_other_entities_data_from_presentations(presentations=df_presentations, conn=conn)
 
@@ -295,6 +297,63 @@ class ExtractTransformAndLoadApresentacoes:
         relationships = relationships[["id_apresentacao_medicamento", "id_forma_farmaceutica"]].drop_duplicates()
 
         return relationships
+
+    @with_database_connection
+    def _extract_packaging_and_load(self, presentations: pd.DataFrame, conn=None) -> None:
+
+        packaging = self._extract_packaging_from_presentations(presentations=presentations)
+
+        if packaging.empty:
+            return
+
+        sql.insert_with_copy(
+            table_name="embalagem_apresentacao_medicamento",
+            data=packaging.to_dict(orient="records"),
+            conn=conn,
+        )
+
+    @staticmethod
+    def _extract_packaging_from_presentations(presentations: pd.DataFrame) -> pd.DataFrame:
+
+        packaging_records = []
+
+        if "embalagens_primarias" not in presentations.columns and "embalagens_secundarias" not in presentations.columns:
+            return pd.DataFrame(columns=["id_embalagem_medicamento", "primaria", "tipo", "observacao", "id_apresentacao_medicamento"])
+
+        for _, row in presentations.iterrows():
+            if pd.isna(row.get("id_apresentacao_medicamento")):
+                continue
+
+            pres_id = row["id_apresentacao_medicamento"]
+
+            primary = row.get("embalagens_primarias")
+            if isinstance(primary, list):
+                for pkg in primary:
+                    if isinstance(pkg, dict) and pkg.get("tipo"):
+                        packaging_records.append({
+                            "id_embalagem_medicamento": str(uuid.uuid4()),
+                            "primaria": True,
+                            "tipo": pkg.get("tipo", "").strip() if pkg.get("tipo") else "",
+                            "observacao": pkg.get("observacao", "").strip() if pkg.get("observacao") else None,
+                            "id_apresentacao_medicamento": pres_id,
+                        })
+
+            secondary = row.get("embalagens_secundarias")
+            if isinstance(secondary, list):
+                for pkg in secondary:
+                    if isinstance(pkg, dict) and pkg.get("tipo"):
+                        packaging_records.append({
+                            "id_embalagem_medicamento": str(uuid.uuid4()),
+                            "primaria": False,
+                            "tipo": pkg.get("tipo", "").strip() if pkg.get("tipo") else "",
+                            "observacao": pkg.get("observacao", "").strip() if pkg.get("observacao") else None,
+                            "id_apresentacao_medicamento": pres_id,
+                        })
+
+        if not packaging_records:
+            return pd.DataFrame(columns=["id_embalagem_medicamento", "primaria", "tipo", "observacao", "id_apresentacao_medicamento"])
+
+        return pd.DataFrame(packaging_records)
 
     @with_database_connection
     def _add_missing_active_ingredients_and_return_all_active_ingredients(self, presentations: pd.DataFrame, conn=None) -> pd.DataFrame:
