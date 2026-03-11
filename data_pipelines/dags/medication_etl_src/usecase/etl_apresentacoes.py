@@ -34,6 +34,8 @@ class ExtractTransformAndLoadApresentacoes:
     def _delete_all_old_presentations_data(self, conn=None) -> None:
 
         print("Deleting all old presentations data...")
+        sql.delete(table_name="forma_farmaceutica_apresentacao_medicamento", conn=conn)
+        sql.delete(table_name="forma_farmaceutica", conn=conn)
         sql.delete(table_name="classe_terapeutica_medicamento", conn=conn)
         sql.delete(table_name="classe_terapeutica", conn=conn)
         sql.delete(table_name="apresentacao_medicamento", conn=conn)
@@ -91,6 +93,7 @@ class ExtractTransformAndLoadApresentacoes:
             df_presentations.drop(columns=["fabricantes_nacionais", "fabricantesInternacionais"], inplace=True)
 
             LoadPresentationsToDB().main(df_presentations=df_presentations, conn=conn)
+            self._extract_pharmaceutic_forms_and_load(presentations=df_presentations, conn=conn)
 
             df_presentations = self._extract_other_entities_data_from_presentations(presentations=df_presentations, conn=conn)
 
@@ -157,6 +160,52 @@ class ExtractTransformAndLoadApresentacoes:
                 conn=conn,
             )
 
+    @with_database_connection
+    def _extract_pharmaceutic_forms_and_load(self, presentations: pd.DataFrame, conn=None) -> None:
+
+        pharmaceutic_forms_in_batch = self._extract_pharmaceutic_forms_from_presentations(presentations=presentations)
+
+        if pharmaceutic_forms_in_batch.empty:
+            return
+
+        pharmaceutic_forms_database = sql.select_with_pandas(
+            "forma_farmaceutica",
+            columns=["id_forma_farmaceutica", "forma_farmaceutica"],
+            conn=conn,
+        )
+
+        missing_pharmaceutic_forms = pharmaceutic_forms_in_batch[
+            ~pharmaceutic_forms_in_batch["forma_farmaceutica"].isin(pharmaceutic_forms_database["forma_farmaceutica"])
+        ].copy()
+        missing_pharmaceutic_forms["id_forma_farmaceutica"] = [self._generate_uuid() for _ in range(len(missing_pharmaceutic_forms))]
+
+        if not missing_pharmaceutic_forms.empty:
+            sql.insert_with_copy(
+                table_name="forma_farmaceutica",
+                data=missing_pharmaceutic_forms.to_dict(orient="records"),
+                conn=conn,
+            )
+
+        pharmaceutic_forms = pd.concat(
+            [pharmaceutic_forms_database, missing_pharmaceutic_forms],
+            ignore_index=True,
+        )
+        pharmaceutic_forms = pharmaceutic_forms[
+            pharmaceutic_forms["forma_farmaceutica"].isin(pharmaceutic_forms_in_batch["forma_farmaceutica"])
+        ]
+
+        relationships = self._extract_pharmaceutic_form_relationships(
+            presentations=presentations,
+            pharmaceutic_forms=pharmaceutic_forms,
+        )
+
+        if not relationships.empty:
+            sql.insert_with_copy(
+                table_name="forma_farmaceutica_apresentacao_medicamento",
+                data=relationships.to_dict(orient="records"),
+                conn=conn,
+            )
+
     @staticmethod
     def _extract_therapeutic_classes_from_products(products: pd.DataFrame) -> pd.DataFrame:
 
@@ -199,6 +248,51 @@ class ExtractTransformAndLoadApresentacoes:
         relationships["id_classe_terapeutica"] = relationships["classes_terapeuticas"].map(classes_mapper)
         relationships = relationships.dropna(subset=["id_classe_terapeutica"])
         relationships = relationships[["id_classe_terapeutica", "id_medicamento"]].drop_duplicates()
+
+        return relationships
+
+    @staticmethod
+    def _extract_pharmaceutic_forms_from_presentations(presentations: pd.DataFrame) -> pd.DataFrame:
+
+        if "formas_farmaceuticas" not in presentations.columns:
+            return pd.DataFrame(columns=["forma_farmaceutica"])
+
+        pharmaceutic_forms = presentations["formas_farmaceuticas"].explode().dropna()
+
+        if pharmaceutic_forms.empty:
+            return pd.DataFrame(columns=["forma_farmaceutica"])
+
+        pharmaceutic_forms = pharmaceutic_forms.astype(str).str.strip()
+        pharmaceutic_forms = pharmaceutic_forms[pharmaceutic_forms != ""]
+
+        if pharmaceutic_forms.empty:
+            return pd.DataFrame(columns=["forma_farmaceutica"])
+
+        return pd.DataFrame({"forma_farmaceutica": pharmaceutic_forms.unique()})
+
+    @staticmethod
+    def _extract_pharmaceutic_form_relationships(presentations: pd.DataFrame, pharmaceutic_forms: pd.DataFrame) -> pd.DataFrame:
+
+        if presentations.empty or pharmaceutic_forms.empty or "formas_farmaceuticas" not in presentations.columns:
+            return pd.DataFrame(columns=["id_apresentacao_medicamento", "id_forma_farmaceutica"])
+
+        relationships = presentations[["id_apresentacao_medicamento", "formas_farmaceuticas"]].copy()
+        relationships = relationships.dropna(subset=["id_apresentacao_medicamento"])
+        relationships = relationships.explode("formas_farmaceuticas").dropna(subset=["formas_farmaceuticas"])
+
+        if relationships.empty:
+            return pd.DataFrame(columns=["id_apresentacao_medicamento", "id_forma_farmaceutica"])
+
+        relationships["formas_farmaceuticas"] = relationships["formas_farmaceuticas"].astype(str).str.strip()
+        relationships = relationships[relationships["formas_farmaceuticas"] != ""]
+
+        if relationships.empty:
+            return pd.DataFrame(columns=["id_apresentacao_medicamento", "id_forma_farmaceutica"])
+
+        forms_mapper = pharmaceutic_forms.set_index("forma_farmaceutica")["id_forma_farmaceutica"].to_dict()
+        relationships["id_forma_farmaceutica"] = relationships["formas_farmaceuticas"].map(forms_mapper)
+        relationships = relationships.dropna(subset=["id_forma_farmaceutica"])
+        relationships = relationships[["id_apresentacao_medicamento", "id_forma_farmaceutica"]].drop_duplicates()
 
         return relationships
 
