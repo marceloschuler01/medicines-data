@@ -34,6 +34,8 @@ class ExtractTransformAndLoadApresentacoes:
     def _delete_all_old_presentations_data(self, conn=None) -> None:
 
         print("Deleting all old presentations data...")
+        sql.delete(table_name="classe_terapeutica_medicamento", conn=conn)
+        sql.delete(table_name="classe_terapeutica", conn=conn)
         sql.delete(table_name="apresentacao_medicamento", conn=conn)
         print("Delete completed.")
 
@@ -62,6 +64,7 @@ class ExtractTransformAndLoadApresentacoes:
         del parsed_data.produtos
         df_produtos = self._join_products_with_medicine_id(active_medicines=active_medicines, products=df_produtos, conn=conn)
         self._update_id_medicamento_referencia_in_medicines(active_medicines=active_medicines, products=df_produtos, conn=conn)
+        self._extract_therapeutic_classes_and_load(products=df_produtos, conn=conn)
         del df_produtos
 
         df_presentations = pd.DataFrame([asdict(item) for item in parsed_data.apresentacoes])
@@ -107,6 +110,97 @@ class ExtractTransformAndLoadApresentacoes:
         self._extract_compositions_and_load_to_database(presentations=presentations, active_medicines=df_active_ingredients, conn=conn)
 
         return presentations
+
+    @with_database_connection
+    def _extract_therapeutic_classes_and_load(self, products: pd.DataFrame, conn=None) -> None:
+
+        therapeutic_classes_in_batch = self._extract_therapeutic_classes_from_products(products=products)
+
+        if therapeutic_classes_in_batch.empty:
+            return
+
+        therapeutic_classes_database = sql.select_with_pandas(
+            "classe_terapeutica",
+            columns=["id_classe_terapeutica", "classe_terapeutica"],
+            conn=conn,
+        )
+
+        missing_therapeutic_classes = therapeutic_classes_in_batch[
+            ~therapeutic_classes_in_batch["classe_terapeutica"].isin(therapeutic_classes_database["classe_terapeutica"])
+        ].copy()
+        missing_therapeutic_classes["id_classe_terapeutica"] = [self._generate_uuid() for _ in range(len(missing_therapeutic_classes))]
+
+        if not missing_therapeutic_classes.empty:
+            sql.insert_with_copy(
+                table_name="classe_terapeutica",
+                data=missing_therapeutic_classes.to_dict(orient="records"),
+                conn=conn,
+            )
+
+        therapeutic_classes = pd.concat(
+            [therapeutic_classes_database, missing_therapeutic_classes],
+            ignore_index=True,
+        )
+        therapeutic_classes = therapeutic_classes[
+            therapeutic_classes["classe_terapeutica"].isin(therapeutic_classes_in_batch["classe_terapeutica"])
+        ]
+
+        relationships = self._extract_therapeutic_class_relationships(
+            products=products,
+            therapeutic_classes=therapeutic_classes,
+        )
+
+        if not relationships.empty:
+            sql.insert_with_copy(
+                table_name="classe_terapeutica_medicamento",
+                data=relationships.to_dict(orient="records"),
+                conn=conn,
+            )
+
+    @staticmethod
+    def _extract_therapeutic_classes_from_products(products: pd.DataFrame) -> pd.DataFrame:
+
+        if "classes_terapeuticas" not in products.columns:
+            return pd.DataFrame(columns=["classe_terapeutica"])
+
+        therapeutic_classes = products["classes_terapeuticas"].explode().dropna()
+
+        if therapeutic_classes.empty:
+            return pd.DataFrame(columns=["classe_terapeutica"])
+
+        therapeutic_classes = therapeutic_classes.astype(str).str.strip()
+        therapeutic_classes = therapeutic_classes[therapeutic_classes != ""]
+
+        if therapeutic_classes.empty:
+            return pd.DataFrame(columns=["classe_terapeutica"])
+
+        return pd.DataFrame({"classe_terapeutica": therapeutic_classes.unique()})
+
+    @staticmethod
+    def _extract_therapeutic_class_relationships(products: pd.DataFrame, therapeutic_classes: pd.DataFrame) -> pd.DataFrame:
+
+        if products.empty or therapeutic_classes.empty or "classes_terapeuticas" not in products.columns:
+            return pd.DataFrame(columns=["id_classe_terapeutica", "id_medicamento"])
+
+        relationships = products[["id_medicamento", "classes_terapeuticas"]].copy()
+        relationships = relationships.dropna(subset=["id_medicamento"])
+        relationships = relationships.explode("classes_terapeuticas").dropna(subset=["classes_terapeuticas"])
+
+        if relationships.empty:
+            return pd.DataFrame(columns=["id_classe_terapeutica", "id_medicamento"])
+
+        relationships["classes_terapeuticas"] = relationships["classes_terapeuticas"].astype(str).str.strip()
+        relationships = relationships[relationships["classes_terapeuticas"] != ""]
+
+        if relationships.empty:
+            return pd.DataFrame(columns=["id_classe_terapeutica", "id_medicamento"])
+
+        classes_mapper = therapeutic_classes.set_index("classe_terapeutica")["id_classe_terapeutica"].to_dict()
+        relationships["id_classe_terapeutica"] = relationships["classes_terapeuticas"].map(classes_mapper)
+        relationships = relationships.dropna(subset=["id_classe_terapeutica"])
+        relationships = relationships[["id_classe_terapeutica", "id_medicamento"]].drop_duplicates()
+
+        return relationships
 
     @with_database_connection
     def _add_missing_active_ingredients_and_return_all_active_ingredients(self, presentations: pd.DataFrame, conn=None) -> pd.DataFrame:

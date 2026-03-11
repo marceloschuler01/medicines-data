@@ -53,6 +53,8 @@ class ExtractTransformAndLoadFromStagingDBToMedicinesDB:
     def _delete_all_old_medicines_data(self, conn=None) -> None:
 
         print("Deleting all old medicines data...")
+        sql.delete(table_name="classe_terapeutica_medicamento", conn=conn)
+        sql.delete(table_name="classe_terapeutica", conn=conn)
         sql.delete(table_name="medicamento", conn=conn)
         sql.delete(table_name="categoria_regulatoria", conn=conn)
         sql.delete(table_name="empresa", conn=conn)
