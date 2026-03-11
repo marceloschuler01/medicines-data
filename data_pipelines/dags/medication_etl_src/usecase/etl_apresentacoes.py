@@ -81,6 +81,9 @@ class ExtractTransformAndLoadApresentacoes:
 
             df_presentations["id_medicamento"] = df_presentations["codigo_anvisa_medicamento"].map(medicines_codigo_anvisa_to_id_mapper)
 
+            # TODO: Investigate why some presentations are coming without a valid medicine id, and fix the root cause instead of dropping these presentations
+            df_presentations = df_presentations.dropna(subset=["id_medicamento"])
+
             # TODO, DO NOT DROP
             df_presentations.drop(columns=["fabricantes_nacionais", "fabricantesInternacionais"], inplace=True)
 
