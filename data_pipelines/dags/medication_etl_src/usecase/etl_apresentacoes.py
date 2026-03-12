@@ -39,6 +39,10 @@ class ExtractTransformAndLoadApresentacoes:
         sql.delete(table_name="forma_farmaceutica", conn=conn)
         sql.delete(table_name="classe_terapeutica_medicamento", conn=conn)
         sql.delete(table_name="classe_terapeutica", conn=conn)
+        sql.delete(table_name="fabricantes_internacionais_apresentacao_medicamento", conn=conn)
+        sql.delete(table_name="fabricantes_nacionais_apresentacao_medicamento", conn=conn)
+        sql.delete(table_name="fabricante_internacional", conn=conn)
+        sql.delete(table_name="fabricante_nacional", conn=conn)
         sql.delete(table_name="apresentacao_medicamento", conn=conn)
         print("Delete completed.")
 
@@ -90,12 +94,11 @@ class ExtractTransformAndLoadApresentacoes:
             # TODO: Investigate why some presentations are coming without a valid medicine id, and fix the root cause instead of dropping these presentations
             df_presentations = df_presentations.dropna(subset=["id_medicamento"])
 
-            # TODO, DO NOT DROP
-            df_presentations.drop(columns=["fabricantes_nacionais", "fabricantesInternacionais"], inplace=True)
-
             LoadPresentationsToDB().main(df_presentations=df_presentations, conn=conn)
             self._extract_pharmaceutic_forms_and_load(presentations=df_presentations, conn=conn)
             self._extract_packaging_and_load(presentations=df_presentations, conn=conn)
+            self._extract_fabricantes_nacionais_and_load(presentations=df_presentations, conn=conn)
+            self._extract_fabricantes_internacionais_and_load(presentations=df_presentations, conn=conn)
 
             df_presentations = self._extract_other_entities_data_from_presentations(presentations=df_presentations, conn=conn)
 
@@ -312,6 +315,88 @@ class ExtractTransformAndLoadApresentacoes:
             conn=conn,
         )
 
+    @with_database_connection
+    def _extract_fabricantes_nacionais_and_load(self, presentations: pd.DataFrame, conn=None) -> None:
+
+        fabricantes = self._extract_fabricantes_nacionais_from_presentations(presentations=presentations)
+
+        if fabricantes.empty:
+            return
+
+        existing_fabricantes = sql.select_with_pandas(
+            "fabricante_nacional",
+            columns=["id_fabricante_nacional", "nome", "cnpj"],
+            conn=conn,
+        )
+
+        missing_fabricantes = fabricantes[
+            ~fabricantes.set_index(["nome", "cnpj"]).index.isin(existing_fabricantes.set_index(["nome", "cnpj"]).index)
+        ].copy()
+        missing_fabricantes["id_fabricante_nacional"] = [self._generate_uuid() for _ in range(len(missing_fabricantes))]
+
+        if not missing_fabricantes.empty:
+            sql.insert_with_copy(
+                table_name="fabricante_nacional",
+                data=missing_fabricantes.to_dict(orient="records"),
+                conn=conn,
+            )
+
+        fabricantes = pd.concat([existing_fabricantes, missing_fabricantes], ignore_index=True)
+        fabricantes = fabricantes.drop_duplicates(subset=["nome", "cnpj"])
+
+        relationships = self._extract_fabricante_nacional_relationships(
+            presentations=presentations,
+            fabricantes=fabricantes,
+        )
+
+        if not relationships.empty:
+            sql.insert_with_copy(
+                table_name="fabricantes_nacionais_apresentacao_medicamento",
+                data=relationships.to_dict(orient="records"),
+                conn=conn,
+            )
+
+    @with_database_connection
+    def _extract_fabricantes_internacionais_and_load(self, presentations: pd.DataFrame, conn=None) -> None:
+
+        fabricantes = self._extract_fabricantes_internacionais_from_presentations(presentations=presentations)
+
+        if fabricantes.empty:
+            return
+
+        existing_fabricantes = sql.select_with_pandas(
+            "fabricante_internacional",
+            columns=["id_fabricante_internacional", "nome_fabricante", "pais"],
+            conn=conn,
+        )
+
+        missing_fabricantes = fabricantes[
+            ~fabricantes.set_index(["nome_fabricante", "pais"]).index.isin(existing_fabricantes.set_index(["nome_fabricante", "pais"]).index)
+        ].copy()
+        missing_fabricantes["id_fabricante_internacional"] = [self._generate_uuid() for _ in range(len(missing_fabricantes))]
+
+        if not missing_fabricantes.empty:
+            sql.insert_with_copy(
+                table_name="fabricante_internacional",
+                data=missing_fabricantes.to_dict(orient="records"),
+                conn=conn,
+            )
+
+        fabricantes = pd.concat([existing_fabricantes, missing_fabricantes], ignore_index=True)
+        fabricantes = fabricantes.drop_duplicates(subset=["nome_fabricante", "pais"])
+
+        relationships = self._extract_fabricante_internacional_relationships(
+            presentations=presentations,
+            fabricantes=fabricantes,
+        )
+
+        if not relationships.empty:
+            sql.insert_with_copy(
+                table_name="fabricantes_internacionais_apresentacao_medicamento",
+                data=relationships.to_dict(orient="records"),
+                conn=conn,
+            )
+
     @staticmethod
     def _extract_packaging_from_presentations(presentations: pd.DataFrame) -> pd.DataFrame:
 
@@ -354,6 +439,132 @@ class ExtractTransformAndLoadApresentacoes:
             return pd.DataFrame(columns=["id_embalagem_medicamento", "primaria", "tipo", "observacao", "id_apresentacao_medicamento"])
 
         return pd.DataFrame(packaging_records)
+
+    @staticmethod
+    def _extract_fabricantes_nacionais_from_presentations(presentations: pd.DataFrame) -> pd.DataFrame:
+
+        fabricantes_records = []
+
+        if "fabricantes_nacionais" not in presentations.columns:
+            return pd.DataFrame(columns=["nome", "cnpj", "uf", "cidade", "etapa_fabricacao"])
+
+        for _, row in presentations.iterrows():
+            if pd.isna(row.get("id_apresentacao_medicamento")):
+                continue
+
+            fabricantes = row.get("fabricantes_nacionais")
+            if isinstance(fabricantes, list):
+                for fab in fabricantes:
+                    if isinstance(fab, dict) and fab.get("fabricante"):
+                        fabricantes_records.append({
+                            "nome": fab.get("fabricante", "").strip() if fab.get("fabricante") else "",
+                            "cnpj": fab.get("cnpj", "").strip() if fab.get("cnpj") else "",
+                            "uf": fab.get("uf", "").strip() if fab.get("uf") else "",
+                            "cidade": fab.get("cidade", "").strip() if fab.get("cidade") else "",
+                            "etapa_fabricacao": fab.get("etapaFabricacao", "").strip() if fab.get("etapaFabricacao") else "",
+                        })
+
+        if not fabricantes_records:
+            return pd.DataFrame(columns=["nome", "cnpj", "uf", "cidade", "etapa_fabricacao"])
+
+        df = pd.DataFrame(fabricantes_records)
+        df = df[df["nome"] != ""]
+        return df.drop_duplicates(subset=["nome", "cnpj"])
+
+    @staticmethod
+    def _extract_fabricante_nacional_relationships(presentations: pd.DataFrame, fabricantes: pd.DataFrame) -> pd.DataFrame:
+
+        relationships = []
+
+        if presentations.empty or fabricantes.empty or "fabricantes_nacionais" not in presentations.columns:
+            return pd.DataFrame(columns=["id_apresentacao_medicamento", "id_fabricante_nacional"])
+
+        fabricantes_mapper = fabricantes.set_index(["nome", "cnpj"])["id_fabricante_nacional"].to_dict()
+
+        for _, row in presentations.iterrows():
+            if pd.isna(row.get("id_apresentacao_medicamento")):
+                continue
+
+            pres_id = row["id_apresentacao_medicamento"]
+            fabricantes_list = row.get("fabricantes_nacionais")
+
+            if isinstance(fabricantes_list, list):
+                for fab in fabricantes_list:
+                    if isinstance(fab, dict) and fab.get("fabricante"):
+                        key = (fab.get("fabricante", "").strip(), fab.get("cnpj", "").strip())
+                        if key in fabricantes_mapper:
+                            relationships.append({
+                                "id_apresentacao_medicamento": pres_id,
+                                "id_fabricante_nacional": fabricantes_mapper[key],
+                            })
+
+        if not relationships:
+            return pd.DataFrame(columns=["id_apresentacao_medicamento", "id_fabricante_nacional"])
+
+        return pd.DataFrame(relationships).drop_duplicates()
+
+    @staticmethod
+    def _extract_fabricantes_internacionais_from_presentations(presentations: pd.DataFrame) -> pd.DataFrame:
+
+        fabricantes_records = []
+
+        if "fabricantesInternacionais" not in presentations.columns:
+            return pd.DataFrame(columns=["nome_fabricante", "endereco", "pais", "codigo_anvisa", "etapa_fabricacao"])
+
+        for _, row in presentations.iterrows():
+            if pd.isna(row.get("id_apresentacao_medicamento")):
+                continue
+
+            fabricantes = row.get("fabricantesInternacionais")
+            if isinstance(fabricantes, list):
+                for fab in fabricantes:
+                    if isinstance(fab, dict) and fab.get("fabricante"):
+                        fabricantes_records.append({
+                            "nome_fabricante": fab.get("fabricante", "").strip() if fab.get("fabricante") else "",
+                            "endereco": fab.get("endereco", "").strip() if fab.get("endereco") else "",
+                            "pais": fab.get("pais", "").strip() if fab.get("pais") else "",
+                            "codigo_anvisa": fab.get("codigoUnico", "").strip() if fab.get("codigoUnico") else "",
+                            "etapa_fabricacao": fab.get("etapaFabricacao", "").strip() if fab.get("etapaFabricacao") else "",
+                        })
+
+        if not fabricantes_records:
+            return pd.DataFrame(columns=["nome_fabricante", "endereco", "pais", "codigo_anvisa", "etapa_fabricacao"])
+
+        df = pd.DataFrame(fabricantes_records)
+        df = df[df["nome_fabricante"] != ""]
+        return df.drop_duplicates(subset=["nome_fabricante", "pais"])
+
+    @staticmethod
+    def _extract_fabricante_internacional_relationships(presentations: pd.DataFrame, fabricantes: pd.DataFrame) -> pd.DataFrame:
+
+        relationships = []
+
+        if presentations.empty or fabricantes.empty or "fabricantesInternacionais" not in presentations.columns:
+            return pd.DataFrame(columns=["id_fabricante_internacional", "id_apresentacao_medicamento"])
+
+        fabricantes_mapper = fabricantes.set_index(["nome_fabricante", "pais"])["id_fabricante_internacional"].to_dict()
+
+        for _, row in presentations.iterrows():
+            if pd.isna(row.get("id_apresentacao_medicamento")):
+                continue
+
+            pres_id = row["id_apresentacao_medicamento"]
+            fabricantes_list = row.get("fabricantesInternacionais")
+
+            if isinstance(fabricantes_list, list):
+                for fab in fabricantes_list:
+                    if isinstance(fab, dict) and fab.get("fabricante"):
+                        key = (fab.get("fabricante", "").strip(), fab.get("pais", "").strip())
+                        if key in fabricantes_mapper:
+                            relationships.append({
+                                "id_fabricante_internacional": fabricantes_mapper[key],
+                                "id_apresentacao_medicamento": pres_id,
+                            })
+
+        if not relationships:
+            return pd.DataFrame(columns=["id_fabricante_internacional", "id_apresentacao_medicamento"])
+
+        return pd.DataFrame(relationships).drop_duplicates()
 
     @with_database_connection
     def _add_missing_active_ingredients_and_return_all_active_ingredients(self, presentations: pd.DataFrame, conn=None) -> pd.DataFrame:

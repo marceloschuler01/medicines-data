@@ -163,6 +163,153 @@ class TestEtlApresentacoes(unittest.TestCase):
 
         self.assertEqual(len(result), 0)
 
+    def test_extract_fabricantes_nacionais_from_presentations_extracts_data(self):
+        presentations = pd.DataFrame(
+            {
+                "id_apresentacao_medicamento": ["pres-1", "pres-2"],
+                "fabricantes_nacionais": [
+                    [
+                        {"fabricante": "FABRICA 1", "cnpj": "12345678000100", "uf": "SP", "cidade": "SAO PAULO", "etapaFabricacao": "Producao"},
+                        {"fabricante": "FABRICA 2", "cnpj": "98765432000100", "uf": "RJ", "cidade": "RIO DE JANEIRO", "etapaFabricacao": None},
+                    ],
+                    [
+                        {"fabricante": "FABRICA 1", "cnpj": "12345678000100", "uf": "SP", "cidade": "SAO PAULO", "etapaFabricacao": "Producao"},
+                    ],
+                ],
+            }
+        )
+
+        result = ExtractTransformAndLoadApresentacoes._extract_fabricantes_nacionais_from_presentations(presentations)
+
+        self.assertEqual(len(result), 2)
+        self.assertTrue(any(result["nome"] == "FABRICA 1"))
+        self.assertTrue(any(result["nome"] == "FABRICA 2"))
+        self.assertTrue(any(result["cnpj"] == "12345678000100"))
+        self.assertTrue(any(result["cnpj"] == "98765432000100"))
+
+    def test_extract_fabricantes_nacionais_from_presentations_filters_empty_names(self):
+        presentations = pd.DataFrame(
+            {
+                "id_apresentacao_medicamento": ["pres-1"],
+                "fabricantes_nacionais": [
+                    [{"fabricante": "", "cnpj": "12345678000100"}],
+                ],
+            }
+        )
+
+        result = ExtractTransformAndLoadApresentacoes._extract_fabricantes_nacionais_from_presentations(presentations)
+
+        self.assertEqual(len(result), 0)
+
+    def test_extract_fabricantes_nacionais_from_presentations_returns_empty_df_when_no_data(self):
+        presentations = pd.DataFrame(
+            {
+                "id_apresentacao_medicamento": ["pres-1", "pres-2"],
+                "fabricantes_nacionais": [None, []],
+            }
+        )
+
+        result = ExtractTransformAndLoadApresentacoes._extract_fabricantes_nacionais_from_presentations(presentations)
+
+        self.assertEqual(len(result), 0)
+
+    def test_extract_fabricantes_internacionais_from_presentations_extracts_data(self):
+        presentations = pd.DataFrame(
+            {
+                "id_apresentacao_medicamento": ["pres-1", "pres-2"],
+                "fabricantesInternacionais": [
+                    [
+                        {"fabricante": "INTAS PHARMA", "pais": "INDIA", "endereco": "123 Main St", "codigoUnico": "ABC123", "etapaFabricacao": "Embalagem"},
+                    ],
+                    [
+                        {"fabricante": "INTAS PHARMA", "pais": "INDIA", "endereco": None, "codigoUnico": None, "etapaFabricacao": None},
+                    ],
+                ],
+            }
+        )
+
+        result = ExtractTransformAndLoadApresentacoes._extract_fabricantes_internacionais_from_presentations(presentations)
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result.iloc[0]["nome_fabricante"], "INTAS PHARMA")
+        self.assertEqual(result.iloc[0]["pais"], "INDIA")
+
+    def test_extract_fabricantes_internacionais_from_presentations_filters_empty_names(self):
+        presentations = pd.DataFrame(
+            {
+                "id_apresentacao_medicamento": ["pres-1"],
+                "fabricantesInternacionais": [
+                    [{"fabricante": "", "pais": "BRASIL"}],
+                ],
+            }
+        )
+
+        result = ExtractTransformAndLoadApresentacoes._extract_fabricantes_internacionais_from_presentations(presentations)
+
+        self.assertEqual(len(result), 0)
+
+    def test_extract_fabricantes_internacionais_from_presentations_returns_empty_df_when_no_data(self):
+        presentations = pd.DataFrame(
+            {
+                "id_apresentacao_medicamento": ["pres-1", "pres-2"],
+                "fabricantesInternacionais": [None, []],
+            }
+        )
+
+        result = ExtractTransformAndLoadApresentacoes._extract_fabricantes_internacionais_from_presentations(presentations)
+
+        self.assertEqual(len(result), 0)
+
+    def test_extract_fabricante_nacional_relationships_maps_fabricantes_to_presentations(self):
+        presentations = pd.DataFrame(
+            {
+                "id_apresentacao_medicamento": ["pres-1", "pres-2", "pres-3"],
+                "fabricantes_nacionais": [
+                    [{"fabricante": "FABRICA 1", "cnpj": "12345678000100"}],
+                    [{"fabricante": "FABRICA 2", "cnpj": "98765432000100"}],
+                    None,
+                ],
+            }
+        )
+        fabricantes = pd.DataFrame(
+            {
+                "id_fabricante_nacional": ["fab-1", "fab-2"],
+                "nome": ["FABRICA 1", "FABRICA 2"],
+                "cnpj": ["12345678000100", "98765432000100"],
+            }
+        )
+
+        result = ExtractTransformAndLoadApresentacoes._extract_fabricante_nacional_relationships(presentations, fabricantes)
+
+        self.assertEqual(len(result), 2)
+        self.assertTrue(any(result["id_apresentacao_medicamento"] == "pres-1"))
+        self.assertTrue(any(result["id_apresentacao_medicamento"] == "pres-2"))
+
+    def test_extract_fabricante_internacional_relationships_maps_fabricantes_to_presentations(self):
+        presentations = pd.DataFrame(
+            {
+                "id_apresentacao_medicamento": ["pres-1", "pres-2", "pres-3"],
+                "fabricantesInternacionais": [
+                    [{"fabricante": "INTAS", "pais": "INDIA"}],
+                    [{"fabricante": "OTHER", "pais": "USA"}],
+                    None,
+                ],
+            }
+        )
+        fabricantes = pd.DataFrame(
+            {
+                "id_fabricante_internacional": ["fab-int-1", "fab-int-2"],
+                "nome_fabricante": ["INTAS", "OTHER"],
+                "pais": ["INDIA", "USA"],
+            }
+        )
+
+        result = ExtractTransformAndLoadApresentacoes._extract_fabricante_internacional_relationships(presentations, fabricantes)
+
+        self.assertEqual(len(result), 2)
+        self.assertTrue(any(result["id_apresentacao_medicamento"] == "pres-1"))
+        self.assertTrue(any(result["id_apresentacao_medicamento"] == "pres-2"))
+
 
 if __name__ == "__main__":
     unittest.main()
