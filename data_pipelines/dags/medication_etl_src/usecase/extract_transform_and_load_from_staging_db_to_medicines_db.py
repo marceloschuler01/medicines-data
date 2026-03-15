@@ -9,12 +9,6 @@ from medication_etl_src.api.adapter.anvisa.anvisa_medicines_adapter import Anvis
 from medication_etl_src.entity.anvisa_entities import MedicineAnvisa
 
 
-@dataclass
-class Result:
-    medicines: pd.DataFrame
-    regulatory_categories: pd.DataFrame
-    enterprises: pd.DataFrame
-
 
 class ExtractTransformAndLoadFromStagingDBToMedicinesDB:
 
