@@ -35,6 +35,16 @@ class GetRawDataAndSaveItAsIs:
         self.PRESENTATIONS_PER_TIME_IN_GET_PRESENTATIONS: int = 800
 
     # ------------------------------------------------------------------
+    # Presentations staging cleanup
+    # ------------------------------------------------------------------
+
+    def drop_presentations_collections(self):
+        self.staging_db.drop_collection(self.COLLECTION_PRESENTATIONS_ACTIVE)
+        self.staging_db.drop_collection(self.COLLECTION_PRESENTATIONS_INACTIVE)
+        self.staging_db.drop_collection(self.COLLECTION_ERRORS_ACTIVE)
+        self.staging_db.drop_collection(self.COLLECTION_ERRORS_INACTIVE)
+
+    # ------------------------------------------------------------------
     # Main orchestrator
     # ------------------------------------------------------------------
 

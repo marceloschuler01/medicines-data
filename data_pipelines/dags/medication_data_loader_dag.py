@@ -20,8 +20,15 @@ def _extract_medicines_data():
     uc.extract_and_save_pharmaceutic_forms()
 
 
+def _clear_presentations_staging():
+    """Clear all presentation collections from staging DB before re-fetching."""
+    from medication_etl_src.usecase.extract_raw_data_and_save_it_as_is import GetRawDataAndSaveItAsIs
+
+    GetRawDataAndSaveItAsIs().drop_presentations_collections()
+
+
 def _extract_presentations_data():
-    """Step 2 – Extract presentations from Anvisa API and save to MongoDB."""
+    """Step 2 – Extract presentations from Manaus API and save to MongoDB."""
     from medication_etl_src.usecase.extract_raw_data_and_save_it_as_is import GetRawDataAndSaveItAsIs
 
     uc = GetRawDataAndSaveItAsIs()
@@ -94,6 +101,11 @@ with DAG(
         python_callable=_extract_medicines_data,
     )
 
+    clear_presentations_staging = PythonOperator(
+        task_id="clear_presentations_staging",
+        python_callable=_clear_presentations_staging,
+    )
+
     extract_presentations = PythonOperator(
         task_id="extract_presentations_data",
         python_callable=_extract_presentations_data,
@@ -130,19 +142,19 @@ with DAG(
 
     # -- Task dependencies (matching the pipeline diagram) -----------------
     #
-    #  extract_medicines  ──►  extract_presentations  ──►  extract_cmed
-    #                                                           │
-    #                          run_migrations  ─────────────────┤
-    #                                                           ▼
-    #                                               transform_load_medicines
-    #                                                           │
-    #                                                           ▼
-    #                                             transform_load_presentations
-    #                                                           │
-    #                                                           ▼
-    #                                                transform_load_cmed
+    #  extract_medicines  ──►  clear_presentations_staging  ──►  extract_presentations  ──►  extract_cmed
+    #                                                                                           │
+    #                                              run_migrations  ──────────────────────────────┤
+    #                                                                                           ▼
+    #                                                                              transform_load_medicines
+    #                                                                                           │
+    #                                                                                           ▼
+    #                                                                            transform_load_presentations
+    #                                                                                           │
+    #                                                                                           ▼
+    #                                                                               transform_load_cmed
 
-    extract_medicines >> extract_presentations >> extract_cmed
+    extract_medicines >> clear_presentations_staging >> extract_presentations >> extract_cmed
     [extract_cmed, run_migrations] >> transform_load_medicines
     transform_load_medicines >> transform_load_presentations
     transform_load_presentations >> transform_load_cmed
