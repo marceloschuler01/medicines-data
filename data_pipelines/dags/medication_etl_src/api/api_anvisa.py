@@ -8,7 +8,9 @@ from medication_etl_src.utils.retry_decorator import retry_decorator
 
 
 class BadResultException(Exception):
-    pass
+    def __init__(self, message, status_code=None):
+        super().__init__(message)
+        self.status_code = status_code
 
 
 class ApiAnvisa:
@@ -79,18 +81,31 @@ class ApiAnvisa:
                     )
                     result.append(presentations)
                     self._times_to_retry = self.MAX_RETRIES
+                except BadResultException as e:
+                    if e.status_code == 500:
+                        print(f"HTTP 500 (expected ANVISA API error) for medicine {medicine['codigo']}, skipping.")
+                        errors.append(medicine)
+                        self._times_to_retry = self.MAX_RETRIES
+                    else:
+                        print("Erro:")
+                        print(traceback.format_exc())
+                        if self._times_to_retry > 0:
+                            self._times_to_retry -= 1
+                            time.sleep(self._get_random_number(1, 3, 2))
+                            r, e = self.get_presentations(medicines=medicines + [medicine])
+                            return result + r, errors + e
+                        else:
+                            raise
                 except Exception:
                     print("Erro:")
                     print(traceback.format_exc())
                     if self._times_to_retry > 0:
                         self._times_to_retry -= 1
-
                         time.sleep(self._get_random_number(1, 3, 2))
-                        r, e = self.get_presentations(medicines=medicines+[medicine])
+                        r, e = self.get_presentations(medicines=medicines + [medicine])
                         return result + r, errors + e
                     else:
-                        errors.append(medicine)
-                        return result, errors
+                        raise
 
         return result, errors
 
@@ -206,7 +221,7 @@ class ApiAnvisa:
                 res_json = res.json()
             except Exception:
                 res_json = ""
-            raise BadResultException(f"Erro na integração com a API da Anvisa: \nstatus:{res.status_code}\nresponse:{res_json}")
+            raise BadResultException(f"Erro na integração com a API da Anvisa: \nstatus:{res.status_code}\nresponse:{res_json}", status_code=res.status_code)
 
         res_json = res.json()
 

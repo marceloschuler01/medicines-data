@@ -16,8 +16,9 @@ class MockApiAnvisa:
     MEDICINES_WITH_ERROR = [145690, 22998,]
     NOTIFICATIONS_WITH_ERROR = [49756, 15841]
 
-    def __init__(self, return_medicines_with_error=False):
+    def __init__(self, return_medicines_with_error=False, raise_non_500_error=False):
         self.return_medicines_with_error = return_medicines_with_error
+        self.raise_non_500_error = raise_non_500_error
 
     def get_active_medicines(self) -> list[MedicineAnvisa]:
 
@@ -54,6 +55,9 @@ class MockApiAnvisa:
         codigo_notificacoes = []
 
         for medicine in medicines:
+            if self.raise_non_500_error and medicine['codigo'] == self.MEDICINES_WITH_ERROR[0]:
+                raise Exception("Simulated network error")
+
             if medicine['tipoAutorizacao']== 'REGISTRADO':
                 codigos_medicamentos.append(medicine['codigo'])
             else:

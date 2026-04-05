@@ -81,6 +81,23 @@ class TestExtractRawDataAndSaveItAsIs(unittest.TestCase):
     # Presentations with errors
     # ------------------------------------------------------------------
 
+    def test_extract_presentations_aborts_on_non_500_error(self):
+        """Non-500 errors (e.g. timeouts) must abort the pipeline, not be silently swallowed."""
+        uc = GetRawDataAndSaveItAsIs(api=MockApiAnvisa, staging_db=self.staging_db)
+        uc.PRESENTATIONS_PER_TIME_IN_GET_PRESENTATIONS = 2
+        uc.api.raise_non_500_error = True
+
+        # Pre-populate medicines so presentations step has data to fetch
+        mock_anvisa = MockApiAnvisa(return_medicines_with_error=True)
+        self.staging_db.insert("active_medicines", mock_anvisa.get_active_medicines())
+
+        with self.assertRaises(Exception):
+            uc.extract_and_save_presentations()
+
+    # ------------------------------------------------------------------
+    # Presentations with 500 errors (gracefully handled)
+    # ------------------------------------------------------------------
+
     def test_extract_and_save_presentations_with_errors(self):
         uc = GetRawDataAndSaveItAsIs(api=MockApiAnvisa, staging_db=self.staging_db)
         uc.PRESENTATIONS_PER_TIME_IN_GET_PRESENTATIONS = 2
