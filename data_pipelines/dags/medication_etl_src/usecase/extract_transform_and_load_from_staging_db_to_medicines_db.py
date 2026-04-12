@@ -31,8 +31,22 @@ class ExtractTransformAndLoadFromStagingDBToMedicinesDB:
         df_medicines['id_categoria_regulatoria'] = df_medicines['categoria_regulatoria'].apply(lambda x: map_regulatory_categories_id[x['codigo']] if isinstance(x, dict) and x['codigo'] else None)
 
         enterprises = self._extract_enterprises(df_medicines['empresa'])
-        map_enterprises_id = enterprises.set_index('numero_autorizacao_anvisa')['id_empresa'].to_dict()
-        df_medicines['id_empresa'] = df_medicines['empresa'].apply(lambda x: map_enterprises_id[x['numeroAutorizacao']] if isinstance(x, dict) and x['numeroAutorizacao'] else None)
+
+        map_by_autorizacao = enterprises.dropna(subset=['numero_autorizacao_anvisa']).set_index('numero_autorizacao_anvisa')['id_empresa'].to_dict()
+        map_by_cnpj = enterprises.set_index('cnpj')['id_empresa'].to_dict()
+
+        def resolve_empresa(x):
+            if not isinstance(x, dict):
+                return None
+            num_aut = x.get('numeroAutorizacao')
+            if num_aut and num_aut in map_by_autorizacao:
+                return map_by_autorizacao[num_aut]
+            cnpj = x.get('cnpj')
+            if cnpj and cnpj in map_by_cnpj:
+                return map_by_cnpj[cnpj]
+            return None
+
+        df_medicines['id_empresa'] = df_medicines['empresa'].apply(resolve_empresa)
 
         df_medicines = df_medicines.drop(columns=["categoria_regulatoria", "empresa"])
         df_medicines["id_medicamento"] = [self._generate_uuid() for _ in range(len(df_medicines))]
@@ -91,8 +105,17 @@ class ExtractTransformAndLoadFromStagingDBToMedicinesDB:
         enterprises = [enterprise for enterprise in enterprises if pd.notnull(enterprise) and enterprise]
 
         df_enterprises = pd.DataFrame(enterprises)
-        df_enterprises = df_enterprises.dropna(subset=["numeroAutorizacao"])
-        df_enterprises = df_enterprises.drop_duplicates(subset=["numeroAutorizacao"])
+
+        has_autorizacao = df_enterprises[df_enterprises["numeroAutorizacao"].notna()].copy()
+        no_autorizacao = df_enterprises[df_enterprises["numeroAutorizacao"].isna()].copy()
+
+        has_autorizacao = has_autorizacao.drop_duplicates(subset=["numeroAutorizacao"])
+        no_autorizacao = no_autorizacao.dropna(subset=["cnpj"])
+        no_autorizacao = no_autorizacao.drop_duplicates(subset=["cnpj"])
+
+        no_autorizacao = no_autorizacao[~no_autorizacao["cnpj"].isin(has_autorizacao["cnpj"])]
+
+        df_enterprises = pd.concat([has_autorizacao, no_autorizacao], ignore_index=True)
 
         df_enterprises = df_enterprises[["cnpj", "razaoSocial", "numeroAutorizacao"]]
 
